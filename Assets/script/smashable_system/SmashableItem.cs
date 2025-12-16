@@ -12,9 +12,9 @@ public class SmashableItem : MonoBehaviour
 {
     [SerializeField] float dissolveTime = 4f;
 
-    [SerializeField] private Renderer meshRenderer;
-    [SerializeField] public BoxCollider boxCollider;
-    [SerializeField] public Rigidbody body;
+    [SerializeField] Renderer meshRenderer;
+    [SerializeField] Collider smashable_collider;
+    [SerializeField] Rigidbody body;
     [SerializeField] LayerMask groundMask;
 
     private Renderer[] renderers;
@@ -22,6 +22,7 @@ public class SmashableItem : MonoBehaviour
     private Rigidbody[] rigidbodies;
 
     [SerializeField] GameEventDataSO game_event_data_SO;
+    [SerializeField] InputDataSO input_data_SO;
 
     public GameObject smashedItem;
 
@@ -36,11 +37,12 @@ public class SmashableItem : MonoBehaviour
 
     internal Data smashedItemData;
 
-    public bool isHit { get; set; }
-    public Vector3 contactPoint { get; set; }
-    public Vector3 forceDirection { get; set; }
+    private bool isHit;
+    private Vector3 contactPoint;
+    private Vector3 forceDirection;
 
     private readonly int dissolveTimeID = Shader.PropertyToID("_DissolveTime");
+    private bool already_smashed = false;
 
     private Vector3 startPos;
     private void Awake()
@@ -64,12 +66,12 @@ public class SmashableItem : MonoBehaviour
             smashedItemData.meshes.Add(meshFilters[i].sharedMesh);
         }
 
-        smashedItemData.propBlocks = new MaterialPropertyBlock[smashedItemData.objectRenderers.Length];
+        //smashedItemData.propBlocks = new MaterialPropertyBlock[smashedItemData.objectRenderers.Length];
 
-        for(int i = 0; i < smashedItemData.objectRenderers.Length; i++)
-        {
-            smashedItemData.propBlocks[i] = new MaterialPropertyBlock();
-        }
+        //for(int i = 0; i < smashedItemData.objectRenderers.Length; i++)
+        //{
+        //    smashedItemData.propBlocks[i] = new MaterialPropertyBlock();
+        //}
     }
 
     private void OnEnable()
@@ -84,11 +86,12 @@ public class SmashableItem : MonoBehaviour
     private void Start()
     {
         startPos = transform.position;
-        foreach(var rigidbody in rigidbodies) { if(rigidbody != null) rigidbody.isKinematic = true; }
+        foreach(var rb in rigidbodies) { if(rb != null) rb.isKinematic = true; }
     }
     private void FixedUpdate()
     {
-        if(isHit)
+        
+        if(isHit && !already_smashed)
         {
             foreach(var renderer in renderers) { if(renderer != null) renderer.enabled = false; }
 
@@ -113,7 +116,7 @@ public class SmashableItem : MonoBehaviour
                 meshRenderer.sharedMaterial = smashedItemData.material;
 
 
-                smashedItemClone.transform.position = boxCollider.transform.position + Vector3.up;
+                smashedItemClone.transform.position = smashable_collider.transform.position + Vector3.up;
 
                 body.isKinematic = false;
                 meshFilter.sharedMesh = smashedItemData.meshes[i];
@@ -122,15 +125,21 @@ public class SmashableItem : MonoBehaviour
                 StartCoroutine(Dissolving(meshRenderer, body, smashedItemClone));
             }
 
-            isHit = false;
+            already_smashed = true;
         }
         else if(!Physics.Raycast(transform.position, Vector3.down, maxDistance: 0.1f, groundMask))
         {
             foreach(var rb in rigidbodies) { if(rb != null) rb.isKinematic = false; }
         }
-
     }
 
+    public void Hit(Vector3 hit_contact_point, Vector3 hit_force_direction)
+    {
+        if(isHit) return;
+        contactPoint = hit_contact_point;
+        forceDirection = hit_force_direction;
+        isHit = true;
+    }
 
     private IEnumerator Dissolving(Renderer renderer, Rigidbody body, GameObject clone)
     {
@@ -140,7 +149,7 @@ public class SmashableItem : MonoBehaviour
         {
             elapsedTime += Time.deltaTime;
             float t = elapsedTime / dissolveTime;
-            SetMPBFloatVariable(renderer, dissolveTimeID, t);
+            //SetMPBFloatVariable(renderer, dissolveTimeID, t);
             yield return null;
         }
 
@@ -149,15 +158,15 @@ public class SmashableItem : MonoBehaviour
     }
 
 
-    protected void SetMPBFloatVariable(Renderer renderer, int valueID, float value)
-    {
-        for(int i = 0; i < smashedItemData.objectRenderers.Length; i++)
-        {
-            renderer.GetPropertyBlock(smashedItemData.propBlocks[i]);
-            smashedItemData.propBlocks[i].SetFloat(valueID, value);
-            renderer.SetPropertyBlock(smashedItemData.propBlocks[i]);
-        }
-    }
+    //protected void SetMPBFloatVariable(Renderer renderer, int valueID, float value)
+    //{
+    //    for(int i = 0; i < smashedItemData.objectRenderers.Length; i++)
+    //    {
+    //        renderer.GetPropertyBlock(smashedItemData.propBlocks[i]);
+    //        smashedItemData.propBlocks[i].SetFloat(valueID, value);
+    //        renderer.SetPropertyBlock(smashedItemData.propBlocks[i]);
+    //    }
+    //}
 
     private void ResetSmashable()
     {
@@ -174,13 +183,13 @@ public class SmashableItem : MonoBehaviour
             }
         }
     }
-    private void OnDrawGizmosSelected()
-    {
-        if(boxCollider == null) return;
-        Vector3 worldCenter = boxCollider.transform.TransformPoint(boxCollider.center);
-        Vector3 worldSize = Vector3.Scale(boxCollider.size, boxCollider.transform.lossyScale);
+    //private void OnDrawGizmosSelected()
+    //{
+    //    if(smashable_collider == null) return;
+    //    Vector3 worldCenter = smashable_collider.transform.TransformPoint(smashable_collider.bounds.center);
+    //    Vector3 worldSize = Vector3.Scale(smashable_collider.bounds.size, smashable_collider.transform.lossyScale);
 
-        Gizmos.matrix = Matrix4x4.TRS(worldCenter, boxCollider.transform.rotation, Vector3.one);
-        Gizmos.DrawWireCube(Vector3.zero, worldSize);
-    }
+    //    Gizmos.matrix = Matrix4x4.TRS(worldCenter, smashable_collider.transform.rotation, Vector3.one);
+    //    Gizmos.DrawWireCube(Vector3.zero, worldSize);
+    //}
 }
