@@ -71,6 +71,10 @@ public class PlayerBrain : MonoBehaviour
         {
             SetState(State.Idle);
         }
+        else if (inputs.sprintInput)
+        {
+            SetState(State.Run);
+        }
         else
         {
             SetState(State.Walk);

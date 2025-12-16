@@ -124,7 +124,6 @@ public class InputManager : MonoBehaviour, ISaveableSettings
         input_data_SO.sprintInput = _sprintAction.ReadValue<float>() > 0;
         input_data_SO.jumpInput = _jumpAction.ReadValue<float>() > 0;
         input_data_SO.lookInput = _lookAction.ReadValue<Vector2>();
-        Debug.Log(input_data_SO.lookInput);
         input_data_SO.interactInput = _interactAction.WasPressedThisFrame();
 
         if(_pauseAction.WasPressedThisFrame() && !_pauseHandledThisFrame)
