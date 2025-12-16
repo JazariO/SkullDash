@@ -58,8 +58,6 @@ public class InputManager : MonoBehaviour, ISaveableSettings
         _crouchAction = playerInput.actions["Crouch"];
         _sprintAction = playerInput.actions["Sprint"];
         _jumpAction = playerInput.actions["Jump"];
-        _flashlightAction = playerInput.actions["Flashlight"];
-        _cameraAction = playerInput.actions["Camera"];
         _interactAction = playerInput.actions["Interact"];
         _lookAction = playerInput.actions["Look"];
         _pauseAction = playerInput.actions["Pause"];
@@ -84,8 +82,8 @@ public class InputManager : MonoBehaviour, ISaveableSettings
         }
 
         if(_playerMap == null && _uiMap == null) return;
-        _playerMap.Disable();
-        _uiMap.Enable();
+        _playerMap.Enable();
+        _uiMap.Disable();
 
         InputSystem.onActionChange += OnInputActionChanged;
         playerInput.onControlsChanged += OnPlayerInputControlsChanged;
