@@ -97,3 +97,6 @@ InitTestScene*.unity*
 
 # Auto-generated scenes by play mode tests
 /[Aa]ssets/[Ii]nit[Tt]est[Ss]cene*.unity*
+
+# NOTE(Jazz): Probuilder settings (should be preferences)
+/[Pp]rojectSettings/[Pp]ackages/com.unity.probuilder/Settings.json
