@@ -196,7 +196,6 @@ public class InputManager : MonoBehaviour, ISaveableSettings
 
     private void LateUpdate()
     {
-        input_data_SO.interactInput = false;
         _pauseHandledThisFrame = false;
     }
 
