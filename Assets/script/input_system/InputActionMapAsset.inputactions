@@ -1,6 +1,6 @@
 {
     "version": 1,
-    "name": "InputActionMap",
+    "name": "InputActionMapAsset",
     "maps": [
         {
             "name": "Player",
