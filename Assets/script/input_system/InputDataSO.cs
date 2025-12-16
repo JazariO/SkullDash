@@ -1,6 +1,6 @@
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "InputDataSO", menuName = "Input Data / Input Data SO")]
+[CreateAssetMenu(fileName = "InputDataSO", menuName = "Input System / Input Data SO")]
 public class InputDataSO : ScriptableObject
 {
     public Vector2 moveInput;
