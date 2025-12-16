@@ -12,4 +12,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 32db058db8fc77a48ba4a2f82805c810, type: 3}
   m_Name: GameEventDataSO
   m_EditorClassIdentifier: Assembly-CSharp::GameEventDataSO
-  OnGameReset: {fileID: 0}
+  OnGameReset: {fileID: 11400000, guid: 3fdfbc2775b8d3941bde150acdc98ec4, type: 2}
