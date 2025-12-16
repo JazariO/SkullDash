@@ -50,12 +50,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SmashableItem
   dissolveTime: 4
   meshRenderer: {fileID: 3709741183033766329}
-  boxCollider: {fileID: 0}
+  smashable_collider: {fileID: 4737235022498914036}
   body: {fileID: 4201449564077686551}
   groundMask:
     serializedVersion: 2
     m_Bits: 8
   game_event_data_SO: {fileID: 11400000, guid: 2e27f7de7ec27a540ab75957d42699a1, type: 2}
+  input_data_SO: {fileID: 11400000, guid: f066dad57d679fc46bde5fd5b502ebc7, type: 2}
   smashedItem: {fileID: 8496382146621378014, guid: 9872f00669548a24b897c893527d815f, type: 3}
 --- !u!33 &6980272926191879165
 MeshFilter:
@@ -158,8 +159,8 @@ Rigidbody:
     m_Bits: 0
   m_ImplicitCom: 1
   m_ImplicitTensor: 1
-  m_UseGravity: 1
-  m_IsKinematic: 0
+  m_UseGravity: 0
+  m_IsKinematic: 1
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
