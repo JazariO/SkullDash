@@ -1,9 +1,9 @@
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class JavelinProjectile : MonoBehaviour
 {
     [SerializeField] Rigidbody rb;
+    [SerializeField] Collider coll;
     [SerializeField] float force = 5f;
     [SerializeField] float rotation_speed = 5f;
     [SerializeField] InputDataSO input_data_SO;
@@ -11,19 +11,25 @@ public class JavelinProjectile : MonoBehaviour
     private bool force_queued;
     private bool reset_queued;
     private Vector3 reset_position;
+    private Quaternion reset_rotation;
     private bool aim_down;
     private bool aim_up;
+    private bool aim_left;
+    private bool aim_right;
     private bool has_hit_surface;
 
     private void Start()
     {
         reset_position = transform.position;
+        reset_rotation = transform.rotation;
     }
 
     private void Update()
     {
         if(input_data_SO.interactInput)
         {
+            reset_position = transform.position;
+            reset_rotation = transform.rotation;
             force_queued = true;
         }
 
@@ -50,6 +56,24 @@ public class JavelinProjectile : MonoBehaviour
         {
             aim_up = false;
         }
+
+        if(Input.GetKey(KeyCode.A))
+        {
+            aim_left = true;
+        }
+        else
+        {
+            aim_left = false;
+        }
+
+        if(Input.GetKey(KeyCode.D))
+        {
+            aim_right = true;
+        }
+        else
+        {
+            aim_right = false;
+        }
     }
 
     private void FixedUpdate()
@@ -59,8 +83,9 @@ public class JavelinProjectile : MonoBehaviour
             rb.isKinematic = true;
             rb.useGravity = false;
             rb.position = reset_position;
-            rb.rotation = Quaternion.identity;
+            rb.rotation = reset_rotation;
             reset_queued = false;
+            has_hit_surface = false;
             return;
         }
 
@@ -85,22 +110,63 @@ public class JavelinProjectile : MonoBehaviour
         {
             transform.rotation = Quaternion.LookRotation(rb.linearVelocity, Vector3.up);
         }
+        if(aim_right)
+        {
+            transform.Rotate(Vector3.up * rotation_speed * Time.fixedDeltaTime);
+
+        }
+        if(aim_left)
+        {
+            transform.Rotate(Vector3.down * rotation_speed * Time.fixedDeltaTime);
+        }
     }
 
     private void OnCollisionEnter(Collision collision)
     {
+
         if(collision.gameObject.TryGetComponent(out SmashableItem smashable))
         {
             smashable.Hit(collision.contacts[0].point, transform.forward);
-        } else if (has_hit_surface)
+        } else if (!has_hit_surface)
         {
+            Debug.Log("Hit surface infront with linear velocity: " + rb.linearVelocity.magnitude);
+            has_hit_surface = true;
+
             // stick into surface
 
             // get contact point closest to the front
             float distance_infront = float.MaxValue;
+            int closest_contact_index = -1;
+
+            Vector3 frontPoint = coll.bounds.center + transform.forward * coll.bounds.extents.z;
+
             for(int i = 0; i < collision.contacts.Length; i++)
             {
-                //distance_infront = Vector3.Distance(collision.contacts[i].point, rigidbody
+                float contact_distance = Vector3.Distance(collision.contacts[i].point, frontPoint);
+                if(contact_distance < distance_infront)
+                {
+                    distance_infront = contact_distance;
+                    closest_contact_index = i;
+                }
+            }
+
+            Debug.Log("Closest Index");
+
+            if(closest_contact_index != -1)
+            {
+                rb.useGravity = false;
+                rb.isKinematic = true;
+
+                Vector3 contact_point = collision.contacts[closest_contact_index].point;
+                Vector3 to_contact = contact_point - coll.bounds.center;
+
+                if(Vector3.Dot(to_contact, transform.forward) > 0f)
+                {
+                    //embed javelin
+                    transform.position = contact_point - transform.forward * 0.1f; // snap to contact
+
+                    transform.position += transform.forward * 0.05f;
+                }
             }
         }
     }
