@@ -50,7 +50,6 @@ public class PlayerBrain : MonoBehaviour
         FixedUpdateState();
         FixedUpdateRotate();
         UpdateHorizontalVelocity();
-        UpdateVerticalVelocity();
         stats.tempStats.isGrounded = IsGrounded();
     }
 
@@ -191,6 +190,8 @@ public class PlayerBrain : MonoBehaviour
             break;
             case State.Jump:
             {
+                UpdateVerticalVelocity();
+
                 if (rigidBody.linearVelocity.y < settings.antiGravApexThreshold)
                 {
                     rigidBody.AddForce(Physics.gravity * (settings.gravity * settings.antiGravApexThreshold), ForceMode.Acceleration);
@@ -199,7 +200,7 @@ public class PlayerBrain : MonoBehaviour
             break;
             case State.Fall:
             {
-
+                UpdateVerticalVelocity();
             }
             break;
             case State.Crouch:
@@ -278,7 +279,7 @@ public class PlayerBrain : MonoBehaviour
 
     private void UpdateVerticalVelocity()
     {
-        stats.tempStats.moveVelocity.y =  stats.tempStats.isGrounded ? stats.tempStats.moveVelocity.y - settings.gravity * Time.fixedDeltaTime : 0;
+        stats.tempStats.moveVelocity.y -= settings.gravity * Time.fixedDeltaTime;
         
         //Clamping Fall speed
         stats.tempStats.moveVelocity.y = Mathf.Max(stats.tempStats.moveVelocity.y, settings.maxFallSpeed);
