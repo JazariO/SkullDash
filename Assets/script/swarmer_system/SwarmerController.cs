@@ -23,7 +23,7 @@ public class SwarmerController : MonoBehaviour
 
         float direction_dot = Vector3.Dot(rb.transform.forward, target_direction);
 
-        cross_torque = Vector3.Cross(rb.transform.forward, target_direction).normalized * turn_speed;
+        cross_torque = Vector3.Cross(rb.transform.forward, target_direction) * turn_speed;
         rb.AddTorque(cross_torque);
 
         rb.AddForce(corrected_target_vector * input_speed, ForceMode.Force);
