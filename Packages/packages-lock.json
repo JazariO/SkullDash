@@ -7,6 +7,13 @@
       "dependencies": {},
       "hash": "73a63b7f672b88f7e9992f6917eb458a8cbb6fa9"
     },
+    "com.proselyte.debugdraw": {
+      "version": "https://github.com/JazariO/DebugDraw.git",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {},
+      "hash": "8ab4f08801b9022aa240933b62e4cd725093c019"
+    },
     "com.proselyte.sigils": {
       "version": "https://github.com/JazariO/Sigils.git",
       "depth": 0,
