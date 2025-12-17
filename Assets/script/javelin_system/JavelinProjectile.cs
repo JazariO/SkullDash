@@ -4,10 +4,8 @@ public class JavelinProjectile : MonoBehaviour
 {
     [SerializeField] Rigidbody rb;
     [SerializeField] Collider coll;
-    [SerializeField] float force = 5f;
-    [SerializeField] float rotation_speed = 5f;
-    [SerializeField] InputDataSO input_data_SO;
 
+    private float _throw_force;
     private bool force_queued;
     private bool reset_queued;
     private Vector3 reset_position;
@@ -18,20 +16,6 @@ public class JavelinProjectile : MonoBehaviour
     {
         reset_position = transform.localPosition;
         reset_rotation = transform.localRotation;
-    }
-
-    private void Update()
-    {
-        if(input_data_SO.attackInput)
-        {
-            force_queued = true;
-        }
-
-        if(Input.GetKeyDown(KeyCode.R))
-        {
-            reset_queued = true;
-            Debug.Log("Reset queued");
-        }
     }
 
     private void FixedUpdate()
@@ -51,7 +35,7 @@ public class JavelinProjectile : MonoBehaviour
         {
             rb.isKinematic = false;
             rb.useGravity = true;
-            rb.AddForce(transform.forward * force, ForceMode.Impulse);
+            rb.AddForce(transform.forward * _throw_force, ForceMode.Impulse);
             force_queued = false;
         }
 
@@ -108,5 +92,16 @@ public class JavelinProjectile : MonoBehaviour
                 }
             }
         }
+    }
+
+    public void ThrowJavelin(float throw_force)
+    {
+        force_queued = true;
+        _throw_force = throw_force;
+    }
+
+    public void ResetJavelin()
+    {
+        reset_queued = true;
     }
 }
