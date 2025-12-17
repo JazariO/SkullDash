@@ -25,11 +25,10 @@ Transform:
   m_GameObject: {fileID: 1039109091933906745}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0.283, y: -0.20899999, z: 0.449}
+  m_LocalPosition: {x: 0.15, y: -0.1, z: 0.23}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 822250858299411894}
+  m_Children: []
   m_Father: {fileID: 1957360013635832627}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &3950590008517370870
@@ -41,6 +40,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1957360013635832627}
+  - component: {fileID: 1037128162256415704}
   m_Layer: 6
   m_Name: HandPivot_right
   m_TagString: Untagged
@@ -64,65 +64,19 @@ Transform:
   - {fileID: 2889859899022606218}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1001 &1572259020495458421
-PrefabInstance:
+--- !u!114 &1037128162256415704
+MonoBehaviour:
   m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    serializedVersion: 3
-    m_TransformParent: {fileID: 2889859899022606218}
-    m_Modifications:
-    - target: {fileID: 2213785243615976899, guid: 1986e7fbbe230c44a87b089aa202a791, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2213785243615976899, guid: 1986e7fbbe230c44a87b089aa202a791, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2213785243615976899, guid: 1986e7fbbe230c44a87b089aa202a791, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2213785243615976899, guid: 1986e7fbbe230c44a87b089aa202a791, type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 2213785243615976899, guid: 1986e7fbbe230c44a87b089aa202a791, type: 3}
-      propertyPath: m_LocalRotation.x
-      value: -0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2213785243615976899, guid: 1986e7fbbe230c44a87b089aa202a791, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: -0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2213785243615976899, guid: 1986e7fbbe230c44a87b089aa202a791, type: 3}
-      propertyPath: m_LocalRotation.z
-      value: -0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2213785243615976899, guid: 1986e7fbbe230c44a87b089aa202a791, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2213785243615976899, guid: 1986e7fbbe230c44a87b089aa202a791, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2213785243615976899, guid: 1986e7fbbe230c44a87b089aa202a791, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5113972977255529321, guid: 1986e7fbbe230c44a87b089aa202a791, type: 3}
-      propertyPath: m_Name
-      value: javelin_model
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-    m_RemovedGameObjects: []
-    m_AddedGameObjects: []
-    m_AddedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: 1986e7fbbe230c44a87b089aa202a791, type: 3}
---- !u!4 &822250858299411894 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 2213785243615976899, guid: 1986e7fbbe230c44a87b089aa202a791, type: 3}
-  m_PrefabInstance: {fileID: 1572259020495458421}
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3950590008517370870}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7631d15a341bcf94c85a3237f87aefc0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::JavelinSpawner
+  javelin_prefab: {fileID: 5113972977255529321, guid: 1986e7fbbe230c44a87b089aa202a791, type: 3}
+  hand_pivot_right: {fileID: 2889859899022606218}
+  input_data_SO: {fileID: 11400000, guid: f066dad57d679fc46bde5fd5b502ebc7, type: 2}
+  throw_power: 30
