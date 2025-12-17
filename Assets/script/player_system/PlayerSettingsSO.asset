@@ -14,10 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerSettingsSO
   walkSpeed: 8
   runSpeed: 12
-  groundAcceleration: 5
+  groundAcceleration: 10
   airAcceleration: 5
   jumpSpeed: 6
-  jumpBufferTime: 0.1
+  jumpBufferTime: 0.5
   coyoteTime: 0.1
   clampedPitch: 70
   gravity: 12
@@ -26,5 +26,6 @@ MonoBehaviour:
   antiGravApexThreshold: 0
   earlyFallGravMultiplier: 3
   fallGravMultiplier: 1.5
-  groundCheckRadius: 0.45
-  groundCheckDistance: 0.12
+  groundCheckRadius: 0.37
+  groundCheckOrigin: 0.5
+  groundCheckDistance: 1

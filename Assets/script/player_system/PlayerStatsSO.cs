@@ -25,6 +25,8 @@ public class PlayerStatsSO : ScriptableObject
         public float curYaw;
         
         public float slope;
+        public Vector3 groundNormal;
+        public Vector3 groundPoint;
         
         public PlayerBrain.State curState;
     }
