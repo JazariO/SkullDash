@@ -10,6 +10,7 @@ public class PlayerStatsSO : ScriptableObject
         public float coyoteTimeElapsed;
         public float curTargetSpeed;
         public Vector3 moveVelocity;
+        public float speed;
         public Quaternion moveDirection;
         public bool isGrounded;
         public bool willJump;
@@ -19,5 +20,5 @@ public class PlayerStatsSO : ScriptableObject
         public float slope;
         public PlayerBrain.State curState;
     }
-    internal TempStats tempStats;
+    public TempStats tempStats;
 }

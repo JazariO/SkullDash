@@ -29,7 +29,7 @@ public class PlayerBrain : MonoBehaviour
 
     private void Awake()
     {
-        stats.tempStats.lastJumpTime = float.MinValue;
+        stats.tempStats.lastJumpTime = -settings.jumpBufferTime;
         stats.tempStats.curYaw = transform.eulerAngles.y;
         stats.tempStats.moveDirection = Quaternion.identity;
     }
@@ -43,7 +43,7 @@ public class PlayerBrain : MonoBehaviour
         SelectState();
         UpdateState();
         UpdateRotation();
-        stats.tempStats.willJump = Time.time - stats.tempStats.lastJumpTime <= settings.jumpBufferTime && stats.tempStats.curState != State.Jump;
+        stats.tempStats.willJump = Time.time - stats.tempStats.lastJumpTime < settings.jumpBufferTime && stats.tempStats.curState != State.Jump;
     }
     private void FixedUpdate()
     {
@@ -268,17 +268,18 @@ public class PlayerBrain : MonoBehaviour
         Vector3 inputDir = forward * inputs.moveInput.y + right * inputs.moveInput.x;
         Vector3 targetHorVelocity = inputDir * stats.tempStats.curTargetSpeed;
 
-        float accel = stats.tempStats.isGrounded ? settings.groundAcceleration : settings.airAcceleration * Time.fixedDeltaTime;
+        float accel = (stats.tempStats.isGrounded ? settings.groundAcceleration : settings.airAcceleration) * Time.fixedDeltaTime;
 
         stats.tempStats.moveVelocity.x = Mathf.Lerp(stats.tempStats.moveVelocity.x, targetHorVelocity.x, accel);
         stats.tempStats.moveVelocity.z = Mathf.Lerp(stats.tempStats.moveVelocity.z, targetHorVelocity.z, accel);
+        stats.tempStats.speed = new Vector3(stats.tempStats.moveVelocity.x, 0f,stats.tempStats.moveVelocity.z).magnitude;
         rigidBody.linearVelocity = stats.tempStats.moveVelocity;
     }
 
     private void UpdateVerticalVelocity()
     {
-        stats.tempStats.moveVelocity.y -= settings.gravity * Time.fixedDeltaTime;
-
+        stats.tempStats.moveVelocity.y =  stats.tempStats.isGrounded ? stats.tempStats.moveVelocity.y - settings.gravity * Time.fixedDeltaTime : 0;
+        
         //Clamping Fall speed
         stats.tempStats.moveVelocity.y = Mathf.Max(stats.tempStats.moveVelocity.y, settings.maxFallSpeed);
     }
