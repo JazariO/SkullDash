@@ -6,7 +6,7 @@ public class MoveableController : MonoBehaviour
     [SerializeField] Axis rotation_axis = Axis.Y;
     [SerializeField] bool rotate;
     [SerializeField] float rotate_speed = 2f;
-
+    [Space]
     [SerializeField] bool move;
     [SerializeField] Transform[] waypoints;
     [SerializeField] float move_speed = 30f;
@@ -44,7 +44,11 @@ public class MoveableController : MonoBehaviour
             Vector3 direction = (targetWaypoint.position - transform.position).normalized;
 
             // Move toward current waypoint
-            transform.position += move_speed * Time.fixedDeltaTime * direction;
+            transform.position = Vector3.MoveTowards(
+                transform.position,
+                targetWaypoint.position,
+                move_speed * Time.fixedDeltaTime
+            );
 
             // Check if close enough to switch to next waypoint
             if(Vector3.Distance(transform.position, targetWaypoint.position) <= waypoint_tolerance)
