@@ -12,8 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2ac0ecc2c6109714fa47f9a79f4e02d7, type: 3}
   m_Name: PlayerSettingsSO
   m_EditorClassIdentifier: Assembly-CSharp::PlayerSettingsSO
-  walkSpeed: 2
-  runSpeed: 4
+  walkSpeed: 5
+  runSpeed: 10
+  groundAcceleration: 10
   jumpSpeed: 6
   gravity: 10
   anitGravMultiplier: 0.5
