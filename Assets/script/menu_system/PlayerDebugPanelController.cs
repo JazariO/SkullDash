@@ -9,7 +9,6 @@ public class PlayerDebugPanelController : MonoBehaviour
 
     [SerializeField] TMP_Text coyote_time_elapsed_TMP;
     [SerializeField] TMP_Text input_move_vector_TMP;
-    [SerializeField] TMP_Text input_look_vector_TMP;
     [SerializeField] TMP_Text move_velocity_TMP;
     [SerializeField] TMP_Text move_direction_TMP;
     [SerializeField] TMP_Text current_target_speed_TMP;
@@ -24,7 +23,6 @@ public class PlayerDebugPanelController : MonoBehaviour
     {
         coyote_time_elapsed_TMP.text    = $"coyote time | {player_stats_SO.tempStats.coyoteTimeElapsed:F2}";
         input_move_vector_TMP.text      = $"in | {input_data_SO.moveInput}";
-        input_look_vector_TMP.text      = $"look | {input_data_SO.lookInput}";
         move_velocity_TMP.text          = $"move vel | ({player_stats_SO.tempStats.moveVelocity.x:F2}, " +
                                                      $"{player_stats_SO.tempStats.moveVelocity.y:F2}, " +
                                                      $"{player_stats_SO.tempStats.moveVelocity.z:F2})";
