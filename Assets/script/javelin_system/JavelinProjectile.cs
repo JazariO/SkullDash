@@ -39,7 +39,7 @@ public class JavelinProjectile : MonoBehaviour
             force_queued = false;
         }
 
-        if(rb.linearVelocity.sqrMagnitude != 0.0f)
+        if(rb.linearVelocity.sqrMagnitude > 0.0f)
         {
             transform.rotation = Quaternion.LookRotation(rb.linearVelocity, Vector3.up);
         }
