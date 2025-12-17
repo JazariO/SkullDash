@@ -15,6 +15,9 @@ public class PlayerSettingsSO : ScriptableObject
     [Tooltip("How quickly the player accelerates to the target movement speed while grounded")]
     public float groundAcceleration = 1;
 
+    [Tooltip("How quickly the player accelerates to the target movement speed while airborne")]
+    public float airAcceleration = 0.1f;
+
     [Tooltip("Initial upward velocity applied when jumping")]
     public float jumpSpeed = 6;
 
