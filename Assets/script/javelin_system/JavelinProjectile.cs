@@ -86,7 +86,7 @@ public class JavelinProjectile : MonoBehaviour
                 if(Vector3.Dot(to_contact, transform.forward) > 0f)
                 {
                     //embed javelin
-                    transform.position = contact_point - transform.forward * 0.1f; // snap to contact
+                    transform.position = contact_point - transform.forward; // snap to contact
 
                     transform.position += transform.forward * 0.05f;
                 }
