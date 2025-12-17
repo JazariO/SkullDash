@@ -95,17 +95,20 @@ public class PlayerBrain : MonoBehaviour
         {
             case State.Idle:
             {
+                stats.tempStats.moveVelocity.y = 0;
 
             }
             break;
             case State.Walk:
             {
                 stats.tempStats.curTargetSpeed = settings.walkSpeed;
+                stats.tempStats.moveVelocity.y = 0;
             }
             break;
             case State.Run:
             {
                 stats.tempStats.curTargetSpeed = settings.runSpeed;
+                stats.tempStats.moveVelocity.y = 0;
             }
             break;
             case State.Jump:
@@ -120,6 +123,7 @@ public class PlayerBrain : MonoBehaviour
             break;
             case State.Crouch:
             {
+                stats.tempStats.moveVelocity.y = 0;
 
             }
             break;
@@ -154,13 +158,16 @@ public class PlayerBrain : MonoBehaviour
             case State.Fall:
             {
                 stats.tempStats.coyoteTimeElapsed += Time.deltaTime;
-                stats.tempStats.coyoteJump = stats.tempStats.coyoteTimeElapsed < settings.coyoteTime && inputs.jumpInput;
 
-                if (inputs.jumpInput)
+                bool jumpPressed = inputs.jumpInput && !stats.tempStats.lastJumpInput;
+
+                if (stats.tempStats.coyoteTimeElapsed < settings.coyoteTime && jumpPressed)
                 {
                     stats.tempStats.lastJumpTime = Time.time;
-                    inputs.jumpInput = false;
+                    stats.tempStats.coyoteJump = false; 
                 }
+
+                stats.tempStats.lastJumpInput = inputs.jumpInput;
             }
             break;
             case State.Crouch:

@@ -17,6 +17,7 @@ public class PlayerStatsSO : ScriptableObject
         
         public bool willJump;
         public float lastJumpTime;
+        public bool lastJumpInput;
         public bool coyoteJump;
         public float coyoteTimeElapsed;
         
