@@ -12,3 +12,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b2cd992f9b7362744b74f79a9d7ea552, type: 3}
   m_Name: InputDataSO
   m_EditorClassIdentifier: Assembly-CSharp::InputDataSO
+  moveInput: {x: 0, y: 0}
+  lookInput: {x: 0, y: 0}
+  crouchInput: 0
+  sprintInput: 0
+  jumpHoldInput: 0
+  jumpPressedInput: 0
+  interactInput: 0
+  attackInput: 0
+  reloadInput: 0
+  InputControlScheme: 

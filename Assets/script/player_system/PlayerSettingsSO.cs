@@ -67,5 +67,8 @@ public class PlayerSettingsSO : ScriptableObject
     public float groundCheckRadius = 0.9f;
 
     [Tooltip("Distance below the player to check for ground contact")]
-    public float groundCheckDistance = 0.25f;
+    public float groundCheckOrigin = 0.25f;
+
+    [Tooltip("Distance of the ground check")]
+    public float groundCheckDistance = 1;
 }

@@ -48,7 +48,8 @@ public class PlayerBrain : MonoBehaviour
         FixedUpdateState();
         FixedUpdateRotate();
         UpdateHorizontalVelocity();
-        stats.tempStats.isGrounded = IsGrounded();
+        UpdateVerticalVelocity();
+        GetGroundHit();
     }
 
     private void OnDisable()
@@ -95,20 +96,17 @@ public class PlayerBrain : MonoBehaviour
         {
             case State.Idle:
             {
-                stats.tempStats.moveVelocity.y = 0;
 
             }
             break;
             case State.Walk:
             {
                 stats.tempStats.curTargetSpeed = settings.walkSpeed;
-                stats.tempStats.moveVelocity.y = 0;
             }
             break;
             case State.Run:
             {
                 stats.tempStats.curTargetSpeed = settings.runSpeed;
-                stats.tempStats.moveVelocity.y = 0;
             }
             break;
             case State.Jump:
@@ -123,7 +121,6 @@ public class PlayerBrain : MonoBehaviour
             break;
             case State.Crouch:
             {
-                stats.tempStats.moveVelocity.y = 0;
 
             }
             break;
@@ -193,13 +190,13 @@ public class PlayerBrain : MonoBehaviour
             break;
             case State.Jump:
             {
-                UpdateVerticalVelocity();
+
 
             }
             break;
             case State.Fall:
             {
-                UpdateVerticalVelocity();
+
             }
             break;
             case State.Crouch:
@@ -279,42 +276,103 @@ public class PlayerBrain : MonoBehaviour
 
     private void UpdateVerticalVelocity()
     {
-        if (!inputs.jumpHoldInput && stats.tempStats.moveVelocity.y > 0)
+        if (stats.tempStats.isGrounded && stats.tempStats.moveVelocity.y < 0)
         {
-            stats.tempStats.curGravityMultiplier = settings.earlyFallGravMultiplier; 
-        }
-        else if (stats.tempStats.moveVelocity.y > 0 && stats.tempStats.moveVelocity.y < settings.antiGravApexThreshold)
-        {
-            stats.tempStats.curGravityMultiplier = settings.antiGravMultiplier;
-        }
-        else if (stats.tempStats.moveVelocity.y < 0)
-        {
-            stats.tempStats.curGravityMultiplier = settings.fallGravMultiplier;
+            stats.tempStats.curGravityMultiplier = 0;
+            stats.tempStats.moveVelocity.y = 0;
         }
         else
         {
-            stats.tempStats.curGravityMultiplier = 1;
+            if (!inputs.jumpHoldInput && stats.tempStats.moveVelocity.y > 0)
+            {
+                stats.tempStats.curGravityMultiplier = settings.earlyFallGravMultiplier;
+            }
+            else if (stats.tempStats.moveVelocity.y > 0 && stats.tempStats.moveVelocity.y < settings.antiGravApexThreshold)
+            {
+                stats.tempStats.curGravityMultiplier = settings.antiGravMultiplier;
+            }
+            else if (stats.tempStats.moveVelocity.y < 0)
+            {
+                stats.tempStats.curGravityMultiplier = settings.fallGravMultiplier;
+            }
+            else if (!stats.tempStats.isGrounded)
+            {
+                stats.tempStats.curGravityMultiplier = 1;
+            }
+
+            stats.tempStats.moveVelocity.y -= settings.gravity * stats.tempStats.curGravityMultiplier * Time.fixedDeltaTime;
+            stats.tempStats.moveVelocity.y = Mathf.Max(stats.tempStats.moveVelocity.y, settings.maxFallSpeed);
+        }
+    }
+
+    private void GetGroundHit()
+    {
+        Vector3[] offsets =
+        {
+            Vector3.zero,
+            new Vector3(capsuleCollider.radius, 0, 0),
+            new Vector3(-capsuleCollider.radius, 0, 0),
+            new Vector3(0, 0, capsuleCollider.radius),
+            new Vector3(0, 0, -capsuleCollider.radius)
+        };
+
+        RaycastHit closestHit = default;
+        float closestDistance = float.MaxValue;
+        bool hasGroundHit = false;
+
+        for (int i = 0; i < offsets.Length; i++)
+        {
+            if (Physics.Raycast(capsuleCollider.bounds.center + offsets[i], Vector3.down, out RaycastHit hit, settings.groundCheckDistance, layerData.ground))
+            {
+                hasGroundHit = true;
+
+                if (hit.distance < closestDistance)
+                {
+                    closestDistance = hit.distance;
+                    closestHit = hit;
+                }
+            }
         }
 
-        stats.tempStats.moveVelocity.y -= settings.gravity * stats.tempStats.curGravityMultiplier * Time.fixedDeltaTime;
-        stats.tempStats.moveVelocity.y = Mathf.Max(stats.tempStats.moveVelocity.y, settings.maxFallSpeed);
+        if (hasGroundHit)
+        {
+            stats.tempStats.groundNormal = closestHit.normal;
+            stats.tempStats.groundPoint = closestHit.point;
+        }
+        else
+        {
+            stats.tempStats.groundNormal = Vector3.up;
+            stats.tempStats.groundPoint = Vector3.zero;
+        }
+
+        stats.tempStats.isGrounded = hasGroundHit;
+        stats.tempStats.slope = Vector3.Angle(stats.tempStats.groundNormal, Vector3.up);
     }
 
-    private bool IsGrounded()
-    {
-        Vector3 bottom = capsuleCollider.bounds.center + Vector3.down * (capsuleCollider.bounds.extents.y - settings.groundCheckRadius + settings.groundCheckDistance);
-        
-        return Physics.CheckCapsule(capsuleCollider.bounds.center, bottom, settings.groundCheckRadius, layerData.ground);
-    }
 
     private void OnDrawGizmosSelected()
     {
-        Gizmos.color = stats.tempStats.isGrounded ? Color.green : Color.red;
+        if (capsuleCollider == null) return;
+        Gizmos.color = Color.yellow;
 
-        if (capsuleCollider != null)
+        Vector3[] offsets = new Vector3[]
         {
-            Vector3 bottom = capsuleCollider.bounds.center + Vector3.down * (capsuleCollider.bounds.extents.y - settings.groundCheckRadius + settings.groundCheckDistance);
-            Gizmos.DrawWireSphere(bottom, settings.groundCheckRadius);
+            Vector3.zero,                                
+            new Vector3(capsuleCollider.radius, 0, 0f), 
+            new Vector3(-capsuleCollider.radius, 0f, 0f),
+            new Vector3(0f, 0f, capsuleCollider.radius), 
+            new Vector3(0f, 0f, -capsuleCollider.radius) 
+        };
+
+        for (int i = 0; i < offsets.Length; i++)
+        {
+            Vector3 start = capsuleCollider.bounds.center + offsets[i];
+
+            bool hit = Physics.Raycast(start, Vector3.down, settings.groundCheckDistance, layerData.ground);
+
+            Gizmos.color = hit ? Color.red : Color.blue;
+            Gizmos.DrawLine(start, start + Vector3.down * settings.groundCheckDistance);
         }
     }
+
 }
