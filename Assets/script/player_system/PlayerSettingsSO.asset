@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerSettingsSO
   walkSpeed: 8
   runSpeed: 12
-  groundAcceleration: 1
+  groundAcceleration: 3
   airAcceleration: 0.1
   jumpSpeed: 8
   jumpBufferTime: 0.2
