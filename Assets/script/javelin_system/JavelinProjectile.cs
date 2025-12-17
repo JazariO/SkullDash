@@ -12,24 +12,18 @@ public class JavelinProjectile : MonoBehaviour
     private bool reset_queued;
     private Vector3 reset_position;
     private Quaternion reset_rotation;
-    private bool aim_down;
-    private bool aim_up;
-    private bool aim_left;
-    private bool aim_right;
     private bool has_hit_surface;
 
     private void Start()
     {
-        reset_position = transform.position;
-        reset_rotation = transform.rotation;
+        reset_position = transform.localPosition;
+        reset_rotation = transform.localRotation;
     }
 
     private void Update()
     {
-        if(input_data_SO.interactInput)
+        if(input_data_SO.attackInput)
         {
-            reset_position = transform.position;
-            reset_rotation = transform.rotation;
             force_queued = true;
         }
 
@@ -37,42 +31,6 @@ public class JavelinProjectile : MonoBehaviour
         {
             reset_queued = true;
             Debug.Log("Reset queued");
-        }
-
-        if(Input.GetKey(KeyCode.S))
-        {
-            aim_down = true;
-        }
-        else
-        {
-            aim_down = false;
-        }
-
-        if(Input.GetKey(KeyCode.W))
-        {
-            aim_up = true;
-        }
-        else
-        {
-            aim_up = false;
-        }
-
-        if(Input.GetKey(KeyCode.A))
-        {
-            aim_left = true;
-        }
-        else
-        {
-            aim_left = false;
-        }
-
-        if(Input.GetKey(KeyCode.D))
-        {
-            aim_right = true;
-        }
-        else
-        {
-            aim_right = false;
         }
     }
 
@@ -82,8 +40,8 @@ public class JavelinProjectile : MonoBehaviour
         {
             rb.isKinematic = true;
             rb.useGravity = false;
-            rb.position = reset_position;
-            rb.rotation = reset_rotation;
+            transform.localPosition = reset_position;
+            transform.localRotation = reset_rotation;
             reset_queued = false;
             has_hit_surface = false;
             return;
@@ -97,27 +55,9 @@ public class JavelinProjectile : MonoBehaviour
             force_queued = false;
         }
 
-        if(aim_down)
-        {
-            transform.Rotate(Vector3.right * rotation_speed * Time.fixedDeltaTime);
-        }
-        if(aim_up)
-        {
-            transform.Rotate(Vector3.left * rotation_speed * Time.fixedDeltaTime);
-        }
-
         if(rb.linearVelocity.sqrMagnitude != 0.0f)
         {
             transform.rotation = Quaternion.LookRotation(rb.linearVelocity, Vector3.up);
-        }
-        if(aim_right)
-        {
-            transform.Rotate(Vector3.up * rotation_speed * Time.fixedDeltaTime);
-
-        }
-        if(aim_left)
-        {
-            transform.Rotate(Vector3.down * rotation_speed * Time.fixedDeltaTime);
         }
     }
 
@@ -129,7 +69,6 @@ public class JavelinProjectile : MonoBehaviour
             smashable.Hit(collision.contacts[0].point, transform.forward);
         } else if (!has_hit_surface)
         {
-            Debug.Log("Hit surface infront with linear velocity: " + rb.linearVelocity.magnitude);
             has_hit_surface = true;
 
             // stick into surface
