@@ -29,7 +29,9 @@ public class PlayerBrain : MonoBehaviour
 
     private void Awake()
     {
-        
+        stats.tempStats.lastJumpTime = float.MinValue;
+        stats.tempStats.curYaw = transform.eulerAngles.y;
+        stats.tempStats.moveDirection = Quaternion.identity;
     }
 
     private void Start()
@@ -50,6 +52,11 @@ public class PlayerBrain : MonoBehaviour
         UpdateHorizontalVelocity();
         UpdateVerticalVelocity();
         stats.tempStats.isGrounded = IsGrounded();
+    }
+
+    private void OnDisable()
+    {
+        stats.tempStats = default;
     }
     private void SelectState()
     {   
@@ -282,10 +289,6 @@ public class PlayerBrain : MonoBehaviour
         return Physics.CheckCapsule(capsuleCollider.bounds.center, bottom, settings.groundCheckRadius, layerData.ground);
     }
 
-    private void OnApplicationQuit()
-    {
-        
-    }
     private void OnDrawGizmosSelected()
     {
         Gizmos.color = stats.tempStats.isGrounded ? Color.green : Color.red;
