@@ -260,26 +260,26 @@ public class PlayerBrain : MonoBehaviour
     }
     private void UpdateHorizontalVelocity()
     {
-        Vector3 forward = Vector3.ProjectOnPlane(transform.forward, Vector3.up).normalized;
-        Vector3 right = Vector3.ProjectOnPlane(transform.right, Vector3.up).normalized;
+        Vector3 forward = Vector3.ProjectOnPlane(transform.forward, stats.tempStats.groundNormal).normalized;
+        Vector3 right = Vector3.ProjectOnPlane(transform.right, stats.tempStats.groundNormal).normalized;
 
         Vector3 inputDir = forward * inputs.moveInput.y + right * inputs.moveInput.x;
-        Vector3 targetHorVelocity = inputDir * stats.tempStats.curTargetSpeed;
+        stats.tempStats.targetHorVelocity = inputDir * stats.tempStats.curTargetSpeed;
 
         float accel = (stats.tempStats.isGrounded ? settings.groundAcceleration : settings.airAcceleration) * Time.fixedDeltaTime;
 
-        stats.tempStats.moveVelocity.x = Mathf.Lerp(stats.tempStats.moveVelocity.x, targetHorVelocity.x, accel);
-        stats.tempStats.moveVelocity.z = Mathf.Lerp(stats.tempStats.moveVelocity.z, targetHorVelocity.z, accel);
+        stats.tempStats.moveVelocity.x = Mathf.Lerp(stats.tempStats.moveVelocity.x, stats.tempStats.targetHorVelocity.x, accel);
+        stats.tempStats.moveVelocity.z = Mathf.Lerp(stats.tempStats.moveVelocity.z, stats.tempStats.targetHorVelocity.z, accel);
         stats.tempStats.speed = new Vector3(stats.tempStats.moveVelocity.x, 0, stats.tempStats.moveVelocity.z).magnitude;
         rigidBody.linearVelocity = stats.tempStats.moveVelocity;
     }
 
     private void UpdateVerticalVelocity()
     {
-        if (stats.tempStats.isGrounded && stats.tempStats.moveVelocity.y < 0)
+        if (stats.tempStats.isGrounded && stats.tempStats.moveVelocity.y <= stats.tempStats.targetHorVelocity.y)
         {
             stats.tempStats.curGravityMultiplier = 0;
-            stats.tempStats.moveVelocity.y = 0;
+            stats.tempStats.moveVelocity.y = stats.tempStats.targetHorVelocity.y;
         }
         else
         {

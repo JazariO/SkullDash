@@ -71,4 +71,8 @@ public class PlayerSettingsSO : ScriptableObject
 
     [Tooltip("Distance of the ground check")]
     public float groundCheckDistance = 1;
+
+    [Range(0, 90)]
+    [Tooltip("The maximum angle in degrees the player can climb")]
+    public float slopeThreshold = 45;
 }
