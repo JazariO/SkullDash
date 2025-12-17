@@ -57,7 +57,7 @@ public class PlayerBrain : MonoBehaviour
     }
     private void SelectState()
     {   
-        if ((stats.tempStats.isGrounded && stats.tempStats.willJump) || (stats.tempStats.moveVelocity.y > 0 && inputs.jumpHoldInput) || stats.tempStats.coyoteJump)
+        if ((stats.tempStats.isGrounded && stats.tempStats.willJump) || (stats.tempStats.moveVelocity.y > 0 && inputs.jumpHoldInput && stats.tempStats.curState != State.Fall) || stats.tempStats.coyoteJump)
         {
             SetState(State.Jump);
         }
@@ -157,11 +157,11 @@ public class PlayerBrain : MonoBehaviour
             case State.Fall:
             {
                 stats.tempStats.coyoteTimeElapsed += Time.deltaTime;
+                stats.tempStats.coyoteJump = stats.tempStats.coyoteTimeElapsed < settings.coyoteTime && inputs.jumpPressedInput;
 
-                if (stats.tempStats.coyoteTimeElapsed < settings.coyoteTime && inputs.jumpPressedInput)
+                if (inputs.jumpPressedInput)
                 {
                     stats.tempStats.lastJumpTime = Time.time;
-                    stats.tempStats.coyoteJump = false; 
                 }
             }
             break;
@@ -296,7 +296,7 @@ public class PlayerBrain : MonoBehaviour
             stats.tempStats.curGravityMultiplier = 1;
         }
 
-            stats.tempStats.moveVelocity.y -= settings.gravity * stats.tempStats.curGravityMultiplier * Time.fixedDeltaTime;
+        stats.tempStats.moveVelocity.y -= settings.gravity * stats.tempStats.curGravityMultiplier * Time.fixedDeltaTime;
         stats.tempStats.moveVelocity.y = Mathf.Max(stats.tempStats.moveVelocity.y, settings.maxFallSpeed);
     }
 
