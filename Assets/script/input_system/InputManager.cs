@@ -1,6 +1,8 @@
 using Proselyte.Sigils;
+using Unity.VisualScripting.Antlr3.Runtime.Misc;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.Windows;
 
 public class InputManager : MonoBehaviour, ISaveableSettings
 {
@@ -16,7 +18,6 @@ public class InputManager : MonoBehaviour, ISaveableSettings
     [Header("References")]
     [SerializeField] InputActionAsset actions;
     [SerializeField] PlayerInput playerInput;
-    
 
     private bool _pauseHandledThisFrame;
 
@@ -28,12 +29,12 @@ public class InputManager : MonoBehaviour, ISaveableSettings
     private InputAction _sprintAction;
     private InputAction _jumpAction;
     private InputAction _interactAction;
+    private InputAction _attackAction;
+    private InputAction _reloadAction;
     private InputAction _lookAction;
     private InputAction _pauseAction;
     private InputAction _quickLoadAction;
     private InputAction _quickSaveAction;
-    private InputAction _flashlightAction;
-    private InputAction _cameraAction;
 
     private void Awake()
     {
@@ -46,7 +47,7 @@ public class InputManager : MonoBehaviour, ISaveableSettings
         input_data_SO.lookInput = Vector2.zero;
         input_data_SO.crouchInput = false;
         input_data_SO.sprintInput = false;
-        input_data_SO.jumpInput = false;
+        input_data_SO.jumpHoldInput = false;
         input_data_SO.interactInput = false;
 
         // Init action maps
@@ -59,6 +60,8 @@ public class InputManager : MonoBehaviour, ISaveableSettings
         _sprintAction = playerInput.actions["Sprint"];
         _jumpAction = playerInput.actions["Jump"];
         _interactAction = playerInput.actions["Interact"];
+        _attackAction = playerInput.actions["Attack"];
+        _reloadAction = playerInput.actions["Reload"];
         _lookAction = playerInput.actions["Look"];
         _pauseAction = playerInput.actions["Pause"];
         _quickLoadAction = playerInput.actions["QuickLoad"];
@@ -113,8 +116,9 @@ public class InputManager : MonoBehaviour, ISaveableSettings
     {
         if(InputManager.isActive) return;
 
-        Cursor.lockState = CursorLockMode.None;
-        Cursor.visible = true;
+
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
     }
 
     private void Update()
@@ -122,8 +126,10 @@ public class InputManager : MonoBehaviour, ISaveableSettings
         input_data_SO.moveInput = _moveAction.ReadValue<Vector2>();
         input_data_SO.crouchInput = _crouchAction.ReadValue<float>() > 0;
         input_data_SO.sprintInput = _sprintAction.ReadValue<float>() > 0;
-        input_data_SO.jumpInput = _jumpAction.ReadValue<float>() > 0;
+        input_data_SO.jumpHoldInput = _jumpAction.ReadValue<float>() > 0;
         input_data_SO.lookInput = _lookAction.ReadValue<Vector2>();
+        input_data_SO.attackInput = _attackAction.WasPressedThisFrame();
+        input_data_SO.reloadInput = _reloadAction.WasPressedThisFrame();
         input_data_SO.interactInput = _interactAction.WasPressedThisFrame();
 
         if(_pauseAction.WasPressedThisFrame() && !_pauseHandledThisFrame)
@@ -139,6 +145,8 @@ public class InputManager : MonoBehaviour, ISaveableSettings
         {
             input_event_data_SO.OnQuickSaveInputEvent.Raise();
         }
+
+        input_data_SO.jumpPressedInput = _jumpAction.WasPressedThisFrame();
     }
 
     public void OnPlayGameEventRaised()
