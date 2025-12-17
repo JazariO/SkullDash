@@ -11,6 +11,7 @@ public class SwarmerController : MonoBehaviour
 
     [SerializeField] Transform target;
     private Vector3 target_direction;
+    private Vector3 cross_torque;
 
     private void FixedUpdate()
     {
@@ -22,7 +23,7 @@ public class SwarmerController : MonoBehaviour
 
         float direction_dot = Vector3.Dot(rb.transform.forward, target_direction);
 
-        Vector3 cross_torque = Vector3.Cross(rb.transform.forward, target_direction).normalized * turn_speed;
+        cross_torque = Vector3.Cross(rb.transform.forward, target_direction).normalized * turn_speed;
         rb.AddTorque(cross_torque);
 
         rb.AddForce(corrected_target_vector * input_speed, ForceMode.Force);
@@ -42,5 +43,15 @@ public class SwarmerController : MonoBehaviour
 
         Gizmos.color = Color.lightGreen;
         Gizmos.DrawWireSphere(coll.transform.position, coll.radius);
+
+        Gizmos.color = Color.red;
+        Gizmos.DrawLine(rb.position, rb.position + rb.transform.right);
+
+        Gizmos.color = Color.green;
+        Gizmos.DrawLine(rb.position, rb.position + rb.transform.up);
+
+        Gizmos.color = Color.blue;
+        Gizmos.DrawLine(rb.position, rb.position + rb.transform.forward);
+
     }
 }
