@@ -28,6 +28,7 @@ public class InputManager : MonoBehaviour, ISaveableSettings
     private InputAction _jumpAction;
     private InputAction _interactAction;
     private InputAction _attackAction;
+    private InputAction _reloadAction;
     private InputAction _lookAction;
     private InputAction _pauseAction;
     private InputAction _quickLoadAction;
@@ -58,6 +59,7 @@ public class InputManager : MonoBehaviour, ISaveableSettings
         _jumpAction = playerInput.actions["Jump"];
         _interactAction = playerInput.actions["Interact"];
         _attackAction = playerInput.actions["Attack"];
+        _reloadAction = playerInput.actions["Reload"];
         _lookAction = playerInput.actions["Look"];
         _pauseAction = playerInput.actions["Pause"];
         _quickLoadAction = playerInput.actions["QuickLoad"];
@@ -112,8 +114,9 @@ public class InputManager : MonoBehaviour, ISaveableSettings
     {
         if(InputManager.isActive) return;
 
-        Cursor.lockState = CursorLockMode.None;
-        Cursor.visible = true;
+
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
     }
 
     private void Update()
@@ -124,6 +127,7 @@ public class InputManager : MonoBehaviour, ISaveableSettings
         input_data_SO.jumpInput = _jumpAction.ReadValue<float>() > 0;
         input_data_SO.lookInput = _lookAction.ReadValue<Vector2>();
         input_data_SO.attackInput = _attackAction.WasPressedThisFrame();
+        input_data_SO.reloadInput = _reloadAction.WasPressedThisFrame();
         input_data_SO.interactInput = _interactAction.WasPressedThisFrame();
 
         if(_pauseAction.WasPressedThisFrame() && !_pauseHandledThisFrame)

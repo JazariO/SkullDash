@@ -10,5 +10,6 @@ public class InputDataSO : ScriptableObject
     public bool jumpInput;
     public bool interactInput;
     public bool attackInput;
+    public bool reloadInput;
     public string InputControlScheme;
 }
