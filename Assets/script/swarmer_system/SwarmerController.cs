@@ -1,4 +1,5 @@
 using UnityEngine;
+using DebugDrawer;
 
 public class SwarmerController : MonoBehaviour
 {
@@ -17,6 +18,7 @@ public class SwarmerController : MonoBehaviour
     {
         // calculate target direction
         target_direction = target.position - rb.position;
+        DebugDraw.WireArrow(rb.position, rb.position + target_direction.normalized, Vector3.up, fromFixedUpdate: true);
 
         Vector3 corrected_target_vector = Vector3.Lerp(transform.forward, target_direction, correction_rate);
         corrected_target_vector.Normalize();
