@@ -6,7 +6,7 @@ public class MoveableController : MonoBehaviour
     [SerializeField] Axis rotation_axis = Axis.Y;
     [SerializeField] bool rotate;
     [SerializeField] float rotate_speed = 2f;
-
+    [Space]
     [SerializeField] bool move;
     [SerializeField] Transform[] waypoints;
     [SerializeField] float move_speed = 30f;
