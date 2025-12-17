@@ -32,6 +32,7 @@ public class PlayerBrain : MonoBehaviour
         stats.tempStats.lastJumpTime = -settings.jumpBufferTime;
         stats.tempStats.curYaw = transform.eulerAngles.y;
         stats.tempStats.moveDirection = Quaternion.identity;
+        stats.tempStats.curGravity = settings.gravity;
     }
 
     private void Start()
@@ -109,7 +110,7 @@ public class PlayerBrain : MonoBehaviour
             case State.Jump:
             {
                 stats.tempStats.moveVelocity.y = settings.jumpSpeed;
-                stats.tempStats.coyoteTimeElapsed = float.MaxValue;
+                stats.tempStats.coyoteTimeElapsed = settings.coyoteTime;
             }
             break;
             case State.Fall:
@@ -192,15 +193,19 @@ public class PlayerBrain : MonoBehaviour
             {
                 UpdateVerticalVelocity();
 
-                if (rigidBody.linearVelocity.y < settings.antiGravApexThreshold)
+                if (stats.tempStats.moveVelocity.y < settings.antiGravApexThreshold)
                 {
-                    rigidBody.AddForce(Physics.gravity * (settings.gravity * settings.antiGravApexThreshold), ForceMode.Acceleration);
+                    stats.tempStats.curGravity = settings.gravity * settings.antiGravMultiplier;
                 }
             }
             break;
             case State.Fall:
             {
                 UpdateVerticalVelocity();
+                if (stats.tempStats.moveVelocity.y < -settings.antiGravApexThreshold)
+                {
+                    stats.tempStats.curGravity = settings.gravity;
+                }
             }
             break;
             case State.Crouch:
@@ -236,7 +241,8 @@ public class PlayerBrain : MonoBehaviour
             break;
             case State.Fall:
             {
-
+                stats.tempStats.coyoteTimeElapsed = 0.0f;
+                stats.tempStats.coyoteJump = false;
             }
             break;
             case State.Crouch:
@@ -273,13 +279,13 @@ public class PlayerBrain : MonoBehaviour
 
         stats.tempStats.moveVelocity.x = Mathf.Lerp(stats.tempStats.moveVelocity.x, targetHorVelocity.x, accel);
         stats.tempStats.moveVelocity.z = Mathf.Lerp(stats.tempStats.moveVelocity.z, targetHorVelocity.z, accel);
-        stats.tempStats.speed = new Vector3(stats.tempStats.moveVelocity.x, 0f,stats.tempStats.moveVelocity.z).magnitude;
+        stats.tempStats.speed = new Vector3(stats.tempStats.moveVelocity.x, 0, stats.tempStats.moveVelocity.z).magnitude;
         rigidBody.linearVelocity = stats.tempStats.moveVelocity;
     }
 
     private void UpdateVerticalVelocity()
     {
-        stats.tempStats.moveVelocity.y -= settings.gravity * Time.fixedDeltaTime;
+        stats.tempStats.moveVelocity.y -= stats.tempStats.curGravity * Time.fixedDeltaTime;
         
         //Clamping Fall speed
         stats.tempStats.moveVelocity.y = Mathf.Max(stats.tempStats.moveVelocity.y, settings.maxFallSpeed);
