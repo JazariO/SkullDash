@@ -12,17 +12,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2ac0ecc2c6109714fa47f9a79f4e02d7, type: 3}
   m_Name: PlayerSettingsSO
   m_EditorClassIdentifier: Assembly-CSharp::PlayerSettingsSO
-  walkSpeed: 8
+  walkSpeed: 9
   runSpeed: 12
-  groundAcceleration: 3
-  airAcceleration: 0.1
-  jumpSpeed: 8
+  groundAcceleration: 7
+  airAcceleration: 5
+  jumpSpeed: 6
   jumpBufferTime: 0.2
   coyoteTime: 0.3
   clampedPitch: 70
-  gravity: 9
+  gravity: 12
   maxFallSpeed: -10
   antiGravMultiplier: 0.5
-  antiGravApexThreshold: 3
+  antiGravApexThreshold: 0
   groundCheckRadius: 0.45
   groundCheckDistance: 0.12

@@ -19,7 +19,6 @@ public class PlayerStatsSO : ScriptableObject
         public float lastJumpTime;
         public bool coyoteJump;
         public float coyoteTimeElapsed;
-        public float curGravity;
         
         public float curPitch;
         public float curYaw;

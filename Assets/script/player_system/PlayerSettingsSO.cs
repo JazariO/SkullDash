@@ -49,7 +49,15 @@ public class PlayerSettingsSO : ScriptableObject
     public float antiGravMultiplier = 0.5f;
 
     [Tooltip("Vertical speed threshold around the jump apex where reduced gravity is applied")]
-    public float antiGravApexThreshold = 3;
+    public float antiGravApexThreshold = 1;
+
+    [Range(1, 3)]
+    [Tooltip("What the gravity increases to on the frames where the velocity is increasing but the jump has cancelled")]
+    public float earlyFallGravMultiplier = 3;
+
+    [Range(1, 3)]
+    [Tooltip("What the gravity increases to when falling")]
+    public float fallGravMultiplier = 1.5f;
 
 
     //GROUND CHECK SETTINGS

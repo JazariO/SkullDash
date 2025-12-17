@@ -1,5 +1,3 @@
-using System;
-using UnityEditor.Overlays;
 using UnityEngine;
 
 public class PlayerBrain : MonoBehaviour
@@ -32,7 +30,6 @@ public class PlayerBrain : MonoBehaviour
         stats.tempStats.lastJumpTime = -settings.jumpBufferTime;
         stats.tempStats.curYaw = transform.eulerAngles.y;
         stats.tempStats.moveDirection = Quaternion.identity;
-        stats.tempStats.curGravity = settings.gravity;
     }
 
     private void Start()
@@ -60,11 +57,11 @@ public class PlayerBrain : MonoBehaviour
     }
     private void SelectState()
     {   
-        if ((stats.tempStats.isGrounded && stats.tempStats.willJump) || stats.tempStats.moveVelocity.y > 0 || stats.tempStats.coyoteJump)
+        if ((stats.tempStats.isGrounded && stats.tempStats.willJump) || (stats.tempStats.moveVelocity.y > 0 && inputs.jumpInput) || stats.tempStats.coyoteJump)
         {
             SetState(State.Jump);
         }
-        else if (stats.tempStats.moveVelocity.y <= 0 && !stats.tempStats.isGrounded)
+        else if (!stats.tempStats.isGrounded)
         {
             SetState(State.Fall);
         }
@@ -76,9 +73,13 @@ public class PlayerBrain : MonoBehaviour
         {
             SetState(State.Walk);
         }
-        else
+        else if (stats.tempStats.isGrounded)
         {
             SetState(State.Idle);
+        }
+        else
+        {
+            Debug.LogWarning($"Did not find state on game object {name}");
         }
     }
     private void SetState(State newState)
@@ -115,14 +116,6 @@ public class PlayerBrain : MonoBehaviour
             break;
             case State.Fall:
             {
-                stats.tempStats.coyoteTimeElapsed += Time.deltaTime;
-                stats.tempStats.coyoteJump = stats.tempStats.coyoteTimeElapsed < settings.coyoteTime && inputs.jumpInput;
-
-                if (inputs.jumpInput)
-                {
-                    stats.tempStats.lastJumpTime = Time.time;
-                    inputs.jumpInput = false;
-                }
             }
             break;
             case State.Crouch:
@@ -160,7 +153,14 @@ public class PlayerBrain : MonoBehaviour
             break;
             case State.Fall:
             {
+                stats.tempStats.coyoteTimeElapsed += Time.deltaTime;
+                stats.tempStats.coyoteJump = stats.tempStats.coyoteTimeElapsed < settings.coyoteTime && inputs.jumpInput;
 
+                if (inputs.jumpInput)
+                {
+                    stats.tempStats.lastJumpTime = Time.time;
+                    inputs.jumpInput = false;
+                }
             }
             break;
             case State.Crouch:
@@ -193,19 +193,11 @@ public class PlayerBrain : MonoBehaviour
             {
                 UpdateVerticalVelocity();
 
-                if (stats.tempStats.moveVelocity.y < settings.antiGravApexThreshold)
-                {
-                    stats.tempStats.curGravity = settings.gravity * settings.antiGravMultiplier;
-                }
             }
             break;
             case State.Fall:
             {
                 UpdateVerticalVelocity();
-                if (stats.tempStats.moveVelocity.y < -settings.antiGravApexThreshold)
-                {
-                    stats.tempStats.curGravity = settings.gravity;
-                }
             }
             break;
             case State.Crouch:
@@ -285,11 +277,25 @@ public class PlayerBrain : MonoBehaviour
 
     private void UpdateVerticalVelocity()
     {
-        stats.tempStats.moveVelocity.y -= stats.tempStats.curGravity * Time.fixedDeltaTime;
-        
-        //Clamping Fall speed
+        float gravityMultiplier = 1f;
+
+        if (!inputs.jumpInput && stats.tempStats.moveVelocity.y > 0)
+        {
+            gravityMultiplier = settings.earlyFallGravMultiplier; 
+        }
+        else if (stats.tempStats.moveVelocity.y > 0 && stats.tempStats.moveVelocity.y < settings.antiGravApexThreshold)
+        {
+            gravityMultiplier = settings.antiGravMultiplier;
+        }
+        else if (stats.tempStats.moveVelocity.y < 0)
+        {
+            gravityMultiplier = settings.fallGravMultiplier;
+        }
+
+        stats.tempStats.moveVelocity.y -= settings.gravity * gravityMultiplier * Time.fixedDeltaTime;
         stats.tempStats.moveVelocity.y = Mathf.Max(stats.tempStats.moveVelocity.y, settings.maxFallSpeed);
     }
+
     private bool IsGrounded()
     {
         Vector3 bottom = capsuleCollider.bounds.center + Vector3.down * (capsuleCollider.bounds.extents.y - settings.groundCheckRadius + settings.groundCheckDistance);
