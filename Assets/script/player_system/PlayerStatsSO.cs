@@ -27,7 +27,10 @@ public class PlayerStatsSO : ScriptableObject
         public float slope;
         public Vector3 groundNormal;
         public Vector3 groundPoint;
-        
+        public Vector3 targetHorVelocity;
+        public float curAccel;
+
+
         public PlayerBrain.State curState;
     }
     public TempStats tempStats;
