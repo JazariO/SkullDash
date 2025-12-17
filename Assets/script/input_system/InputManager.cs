@@ -16,7 +16,6 @@ public class InputManager : MonoBehaviour, ISaveableSettings
     [Header("References")]
     [SerializeField] InputActionAsset actions;
     [SerializeField] PlayerInput playerInput;
-    
 
     private bool _pauseHandledThisFrame;
 
@@ -28,12 +27,11 @@ public class InputManager : MonoBehaviour, ISaveableSettings
     private InputAction _sprintAction;
     private InputAction _jumpAction;
     private InputAction _interactAction;
+    private InputAction _attackAction;
     private InputAction _lookAction;
     private InputAction _pauseAction;
     private InputAction _quickLoadAction;
     private InputAction _quickSaveAction;
-    private InputAction _flashlightAction;
-    private InputAction _cameraAction;
 
     private void Awake()
     {
@@ -59,6 +57,7 @@ public class InputManager : MonoBehaviour, ISaveableSettings
         _sprintAction = playerInput.actions["Sprint"];
         _jumpAction = playerInput.actions["Jump"];
         _interactAction = playerInput.actions["Interact"];
+        _attackAction = playerInput.actions["Attack"];
         _lookAction = playerInput.actions["Look"];
         _pauseAction = playerInput.actions["Pause"];
         _quickLoadAction = playerInput.actions["QuickLoad"];
@@ -124,6 +123,7 @@ public class InputManager : MonoBehaviour, ISaveableSettings
         input_data_SO.sprintInput = _sprintAction.ReadValue<float>() > 0;
         input_data_SO.jumpInput = _jumpAction.ReadValue<float>() > 0;
         input_data_SO.lookInput = _lookAction.ReadValue<Vector2>();
+        input_data_SO.attackInput = _attackAction.WasPressedThisFrame();
         input_data_SO.interactInput = _interactAction.WasPressedThisFrame();
 
         if(_pauseAction.WasPressedThisFrame() && !_pauseHandledThisFrame)
