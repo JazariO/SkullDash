@@ -1,6 +1,8 @@
 using Proselyte.Sigils;
+using Unity.VisualScripting.Antlr3.Runtime.Misc;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.Windows;
 
 public class InputManager : MonoBehaviour, ISaveableSettings
 {
@@ -45,7 +47,7 @@ public class InputManager : MonoBehaviour, ISaveableSettings
         input_data_SO.lookInput = Vector2.zero;
         input_data_SO.crouchInput = false;
         input_data_SO.sprintInput = false;
-        input_data_SO.jumpInput = false;
+        input_data_SO.jumpHoldInput = false;
         input_data_SO.interactInput = false;
 
         // Init action maps
@@ -124,7 +126,7 @@ public class InputManager : MonoBehaviour, ISaveableSettings
         input_data_SO.moveInput = _moveAction.ReadValue<Vector2>();
         input_data_SO.crouchInput = _crouchAction.ReadValue<float>() > 0;
         input_data_SO.sprintInput = _sprintAction.ReadValue<float>() > 0;
-        input_data_SO.jumpInput = _jumpAction.ReadValue<float>() > 0;
+        input_data_SO.jumpHoldInput = _jumpAction.ReadValue<float>() > 0;
         input_data_SO.lookInput = _lookAction.ReadValue<Vector2>();
         input_data_SO.attackInput = _attackAction.WasPressedThisFrame();
         input_data_SO.reloadInput = _reloadAction.WasPressedThisFrame();
@@ -143,6 +145,8 @@ public class InputManager : MonoBehaviour, ISaveableSettings
         {
             input_event_data_SO.OnQuickSaveInputEvent.Raise();
         }
+
+        input_data_SO.jumpPressedInput = _jumpAction.WasPressedThisFrame();
     }
 
     public void OnPlayGameEventRaised()

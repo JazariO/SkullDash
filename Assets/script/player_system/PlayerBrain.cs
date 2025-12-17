@@ -57,7 +57,7 @@ public class PlayerBrain : MonoBehaviour
     }
     private void SelectState()
     {   
-        if ((stats.tempStats.isGrounded && stats.tempStats.willJump) || (stats.tempStats.moveVelocity.y > 0 && inputs.jumpInput) || stats.tempStats.coyoteJump)
+        if ((stats.tempStats.isGrounded && stats.tempStats.willJump) || (stats.tempStats.moveVelocity.y > 0 && inputs.jumpHoldInput) || stats.tempStats.coyoteJump)
         {
             SetState(State.Jump);
         }
@@ -135,39 +135,34 @@ public class PlayerBrain : MonoBehaviour
         {
             case State.Idle:
             {
-                if (inputs.jumpInput) stats.tempStats.lastJumpTime = Time.time;
+                if (inputs.jumpPressedInput) stats.tempStats.lastJumpTime = Time.time;
             }
             break;
             case State.Walk:
             {
-                if (inputs.jumpInput) stats.tempStats.lastJumpTime = Time.time;
+                if (inputs.jumpPressedInput) stats.tempStats.lastJumpTime = Time.time;
                 stats.tempStats.curTargetSpeed = settings.walkSpeed;
             }
             break;
             case State.Run:
             {
-                if (inputs.jumpInput) stats.tempStats.lastJumpTime = Time.time;
+                if (inputs.jumpPressedInput) stats.tempStats.lastJumpTime = Time.time;
                 stats.tempStats.curTargetSpeed = settings.runSpeed;
             }
             break;
             case State.Jump:
             {
-
             }
             break;
             case State.Fall:
             {
                 stats.tempStats.coyoteTimeElapsed += Time.deltaTime;
 
-                bool jumpPressed = inputs.jumpInput && !stats.tempStats.lastJumpInput;
-
-                if (stats.tempStats.coyoteTimeElapsed < settings.coyoteTime && jumpPressed)
+                if (stats.tempStats.coyoteTimeElapsed < settings.coyoteTime && inputs.jumpPressedInput)
                 {
                     stats.tempStats.lastJumpTime = Time.time;
                     stats.tempStats.coyoteJump = false; 
                 }
-
-                stats.tempStats.lastJumpInput = inputs.jumpInput;
             }
             break;
             case State.Crouch:
@@ -284,22 +279,24 @@ public class PlayerBrain : MonoBehaviour
 
     private void UpdateVerticalVelocity()
     {
-        float gravityMultiplier = 1f;
-
-        if (!inputs.jumpInput && stats.tempStats.moveVelocity.y > 0)
+        if (!inputs.jumpHoldInput && stats.tempStats.moveVelocity.y > 0)
         {
-            gravityMultiplier = settings.earlyFallGravMultiplier; 
+            stats.tempStats.curGravityMultiplier = settings.earlyFallGravMultiplier; 
         }
         else if (stats.tempStats.moveVelocity.y > 0 && stats.tempStats.moveVelocity.y < settings.antiGravApexThreshold)
         {
-            gravityMultiplier = settings.antiGravMultiplier;
+            stats.tempStats.curGravityMultiplier = settings.antiGravMultiplier;
         }
         else if (stats.tempStats.moveVelocity.y < 0)
         {
-            gravityMultiplier = settings.fallGravMultiplier;
+            stats.tempStats.curGravityMultiplier = settings.fallGravMultiplier;
+        }
+        else
+        {
+            stats.tempStats.curGravityMultiplier = 1;
         }
 
-        stats.tempStats.moveVelocity.y -= settings.gravity * gravityMultiplier * Time.fixedDeltaTime;
+            stats.tempStats.moveVelocity.y -= settings.gravity * stats.tempStats.curGravityMultiplier * Time.fixedDeltaTime;
         stats.tempStats.moveVelocity.y = Mathf.Max(stats.tempStats.moveVelocity.y, settings.maxFallSpeed);
     }
 
