@@ -73,8 +73,6 @@ public class JavelinProjectile : MonoBehaviour
                 }
             }
 
-            Debug.Log("Closest Index");
-
             if(closest_contact_index != -1)
             {
                 rb.useGravity = false;
