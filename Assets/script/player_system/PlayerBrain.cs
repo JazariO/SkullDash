@@ -355,15 +355,21 @@ public class PlayerBrain : MonoBehaviour
 
             Vector3 planeNormal = Vector3.zero;
 
-            for (int i = 0; i < hitCount; i++)
+            if (hitCount > 1)
             {
-                Vector3 bitangent = stats.tempStats.hitPoints[i] - stats.tempStats.groundPlaneCentroid;
-                int nextIndex = (i + 1) % hitCount;
-                Vector3 tangent = stats.tempStats.hitPoints[nextIndex] - stats.tempStats.groundPlaneCentroid;
-                planeNormal += Vector3.Cross(bitangent, tangent);
+                for (int i = 0; i < hitCount; i++)
+                {
+                    Vector3 bitangent = stats.tempStats.hitPoints[i] - stats.tempStats.groundPlaneCentroid;
+                    int nextIndex = (i + 1) % hitCount;
+                    Vector3 tangent = stats.tempStats.hitPoints[nextIndex] - stats.tempStats.groundPlaneCentroid;
+                    planeNormal += Vector3.Cross(bitangent, tangent);
+                }
+                stats.tempStats.groundNormal = planeNormal.normalized;
             }
-
-            stats.tempStats.groundNormal = planeNormal.normalized;
+            else
+            {
+                stats.tempStats.groundNormal = stats.tempStats.hitPoints[0].normalized;
+            }
         }
         else
         {
