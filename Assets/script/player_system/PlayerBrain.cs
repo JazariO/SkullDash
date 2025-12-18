@@ -298,28 +298,31 @@ public class PlayerBrain : MonoBehaviour
         else if (stats.tempStats.slope == 0)
         {
             stats.tempStats.moveVelocity.y = 0;
+            float distanceFromGround = (capsuleCollider.bounds.center.y - stats.tempStats.groundPlaneCentroid.y) * 1.1f;
+
+            if (distanceFromGround < settings.groundCheckDistance)
+            {
+                float corForce = settings.correctionSpeed * (1 - (distanceFromGround / settings.groundCheckDistance));
+                stats.tempStats.correctionForce = new Vector3(0, corForce, 0);
+            }
         }
         else
         {
             stats.tempStats.moveVelocity.y = curMoveVelocity.y;
         }
+
         stats.tempStats.moveVelocity.x = curMoveVelocity.x;
         stats.tempStats.moveVelocity.z = curMoveVelocity.z;
 
+
+
         stats.tempStats.speed = stats.tempStats.moveVelocity.magnitude;
+        rigidBody.linearVelocity = stats.tempStats.moveVelocity + stats.tempStats.curJumpForce + stats.tempStats.correctionForce;
 
-        if (capsuleCollider.bounds.center.y - stats.tempStats.worldCentroid.y < settings.groundCheckDistance * 0.5)
+        if (stats.tempStats.moveVelocity != Vector3.zero)
         {
-            stats.tempStats.correctionForce = Vector3.up;
+            DebugDraw.WireArrow(capsuleCollider.bounds.center, capsuleCollider.bounds.center + stats.tempStats.moveVelocity, Vector3.up, color: Color.red, fromFixedUpdate: true);
         }
-        else
-        {
-            stats.tempStats.correctionForce = Vector3.zero;
-
-        }
-            rigidBody.linearVelocity = stats.tempStats.moveVelocity + stats.tempStats.curJumpForce + stats.tempStats.correctionForce;
-
-        DebugDraw.WireArrow(capsuleCollider.bounds.center, capsuleCollider.bounds.center + stats.tempStats.moveVelocity, Vector3.up, color: Color.red, fromFixedUpdate: true);
     }
     private void GetGroundData()
     {
@@ -348,7 +351,7 @@ public class PlayerBrain : MonoBehaviour
             }
         }
 
-        stats.tempStats.isGrounded = hitCount > 0;
+        stats.tempStats.isGrounded = hitCount > 2;
         if (stats.tempStats.isGrounded)
         {
             stats.tempStats.groundPoint = pointSum / hitCount;
@@ -358,27 +361,27 @@ public class PlayerBrain : MonoBehaviour
             stats.tempStats.groundPoint = Vector3.zero;
         }
 
-        stats.tempStats.worldCentroid = Vector3.zero;
+        stats.tempStats.groundPlaneCentroid = Vector3.zero;
 
         for (int i = 0; i < hitCount; i++)
         {
-            stats.tempStats.worldCentroid += hitPoints[i];
+            stats.tempStats.groundPlaneCentroid += hitPoints[i];
         }
-        stats.tempStats.worldCentroid /= hitCount;
+        stats.tempStats.groundPlaneCentroid /= hitCount;
 
         Vector3 planeNormal = Vector3.zero;
 
         for (int i = 0; i < hitCount; i++)
         {
-            Vector3 bitangent = hitPoints[i] - stats.tempStats.worldCentroid;
+            Vector3 bitangent = hitPoints[i] - stats.tempStats.groundPlaneCentroid;
             int nextIndex = (i + 1) % hitCount;
-            Vector3 tangent = hitPoints[nextIndex] - stats.tempStats.worldCentroid;
+            Vector3 tangent = hitPoints[nextIndex] - stats.tempStats.groundPlaneCentroid;
             planeNormal += Vector3.Cross(bitangent, tangent);
         }
 
         stats.tempStats.groundNormal = planeNormal.normalized;
 
-        DebugDraw.WireQuad(stats.tempStats.worldCentroid, Quaternion.FromToRotation(Vector3.forward, stats.tempStats.groundNormal), Vector3.one, color: Color.red, fromFixedUpdate: true);
+        DebugDraw.WireQuad(stats.tempStats.groundPlaneCentroid, Quaternion.FromToRotation(Vector3.forward, stats.tempStats.groundNormal), Vector3.one, color: Color.red, fromFixedUpdate: true);
     }
 
 
@@ -405,9 +408,6 @@ public class PlayerBrain : MonoBehaviour
             Gizmos.color = hit ? Color.red : Color.blue;
             Gizmos.DrawLine(start, start + Vector3.down * settings.groundCheckDistance);
         }
-
-
         Gizmos.color = Color.yellow;
     }
-
 }

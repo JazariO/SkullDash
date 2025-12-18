@@ -11,7 +11,7 @@ public class PlayerStatsSO : ScriptableObject
         public Vector3 moveVelocity;
         public Vector3 groundNormal;
         public Vector3 groundPoint;
-        public Vector3 worldCentroid;
+        public Vector3 groundPlaneCentroid;
         public Vector3 groundDistance;
         public Vector3 targetVelocity;
         public Vector3 curJumpForce;
