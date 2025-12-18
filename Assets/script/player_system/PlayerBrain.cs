@@ -270,9 +270,7 @@ public class PlayerBrain : MonoBehaviour
 
         float accel = (stats.tempStats.isGrounded ? settings.groundAcceleration : settings.airAcceleration) * Time.fixedDeltaTime;
 
-        Vector3 curMoveVelocity = stats.tempStats.moveVelocity;
-        curMoveVelocity.y = 0;
-        curMoveVelocity = Vector3.Lerp(curMoveVelocity, stats.tempStats.targetVelocity, accel);
+        Vector3 curMoveVelocity = Vector3.Lerp(stats.tempStats.moveVelocity, stats.tempStats.targetVelocity, accel);
 
         if (!stats.tempStats.isGrounded || slopeThreshold > 1)
         {
@@ -306,7 +304,7 @@ public class PlayerBrain : MonoBehaviour
         stats.tempStats.speed = stats.tempStats.moveVelocity.magnitude;
         rigidBody.linearVelocity = stats.tempStats.moveVelocity + stats.tempStats.curJumpForce;
 
-        DebugDraw.WireArrow(capsuleCollider.bounds.center, capsuleCollider.bounds.center + stats.tempStats.moveVelocity, Vector3.up, fromFixedUpdate: true);
+        DebugDraw.WireArrow(capsuleCollider.bounds.center, capsuleCollider.bounds.center + stats.tempStats.moveVelocity, Vector3.up, color: Color.red, fromFixedUpdate: true);
     }
     private void GetGroundData()
     {
