@@ -31,6 +31,17 @@ public class PlayerBrain : MonoBehaviour
         stats.tempStats.lastJumpTime = -settings.jumpBufferTime;
         stats.tempStats.curYaw = transform.eulerAngles.y;
         stats.tempStats.moveDirection = Quaternion.identity;
+
+        float groundCheckOffset = capsuleCollider.radius * settings.groundCheckRadius;
+        stats.cacheStats.groundCheckOffsets = new Vector3[]
+        {
+            Vector3.zero,
+            new Vector3(groundCheckOffset, 0, 0),
+            new Vector3(-groundCheckOffset, 0, 0),
+            new Vector3(0, 0, groundCheckOffset),
+            new Vector3(0, 0, -groundCheckOffset)
+        };
+        stats.tempStats.hitPoints = new Vector3[stats.cacheStats.groundCheckOffsets.Length];
     }
 
     private void Start()
@@ -265,7 +276,7 @@ public class PlayerBrain : MonoBehaviour
         float slopeThreshold = Vector3.Angle(stats.tempStats.groundNormal, Vector3.up) / settings.slopeAngleThreshold; // slope factor that finds the percentage of the ground angle compared to the angle threshold
         Vector3 slopeDirection = Vector3.ProjectOnPlane(Vector3.down, stats.tempStats.groundNormal).normalized;
         float slopeDot = Vector3.Dot(moveDir, slopeDirection); // -1 to 1 value to determine the angle of the ground relative to the movement direction
-        stats.tempStats.slope = slopeDot * slopeThreshold; // slope becomes a multiplier with 1 being the flat surface. less than one the slope is uphill, more than 1 the slope is downhill
+        stats.tempStats.slope = stats.tempStats.curState == State.Jump || stats.tempStats.curState == State.Fall ? slopeDot * slopeThreshold : 0; // slope becomes a multiplier with 1 being the flat surface. less than one the slope is uphill, more than 1 the slope is downhill
         stats.tempStats.targetVelocity = moveDir * stats.tempStats.curTargetSpeed * (1 + stats.tempStats.slope);
 
         float accel = (stats.tempStats.isGrounded ? settings.groundAcceleration : settings.airAcceleration) * Time.fixedDeltaTime;
@@ -290,7 +301,7 @@ public class PlayerBrain : MonoBehaviour
             stats.tempStats.moveVelocity.y -= settings.gravity * stats.tempStats.curGravityMultiplier * Time.fixedDeltaTime;
             stats.tempStats.moveVelocity.y = Mathf.Max(stats.tempStats.moveVelocity.y, settings.maxFallSpeed);
 
-            stats.tempStats.correctionForce = Vector3.zero;
+            stats.tempStats.correctionForce = 0;
         }
         else if (stats.tempStats.slope == 0)
         {
@@ -299,8 +310,7 @@ public class PlayerBrain : MonoBehaviour
 
             if (distanceFromGround < settings.groundCheckDistance)
             {
-                float corForce = settings.correctionSpeed * (1 - (distanceFromGround / settings.groundCheckDistance));
-                stats.tempStats.correctionForce = new Vector3(0, corForce, 0);
+                stats.tempStats.correctionForce = settings.correctionSpeed * (1 - (distanceFromGround / settings.groundCheckDistance));
             }
         }
         else
@@ -312,39 +322,26 @@ public class PlayerBrain : MonoBehaviour
         stats.tempStats.moveVelocity.z = curMoveVelocity.z;
 
 
-
+        stats.tempStats.moveVelocity.y += stats.tempStats.correctionForce;
         stats.tempStats.speed = stats.tempStats.moveVelocity.magnitude;
-        rigidBody.linearVelocity = stats.tempStats.moveVelocity + stats.tempStats.correctionForce;
+        rigidBody.linearVelocity = stats.tempStats.moveVelocity;
         DebugDraw.WireArrow(capsuleCollider.bounds.center, capsuleCollider.bounds.center + stats.tempStats.moveVelocity, Vector3.up, color: Color.red, fromFixedUpdate: true);
     }
     private void GetGroundData()
     {
-        Vector3[] offsets =
-        {
-            Vector3.zero,
-            new Vector3(capsuleCollider.radius, 0, 0),
-            new Vector3(-capsuleCollider.radius, 0, 0),
-            new Vector3(0, 0, capsuleCollider.radius),
-            new Vector3(0, 0, -capsuleCollider.radius)
-        };
-
-        Vector3 normalSum = Vector3.zero;
         Vector3 pointSum = Vector3.zero;
         int hitCount = 0;
-
-        Vector3[] hitPoints = new Vector3[offsets.Length];
-        for (int i = 0; i < offsets.Length; i++)
+        for (int i = 0; i < stats.cacheStats.groundCheckOffsets.Length; i++)
         {
-            if (Physics.Raycast(capsuleCollider.bounds.center + offsets[i], Vector3.down, out RaycastHit hit, settings.groundCheckDistance, layerData.ground))
+            if (Physics.Raycast(capsuleCollider.bounds.center + stats.cacheStats.groundCheckOffsets[i], Vector3.down, out RaycastHit hit, settings.groundCheckDistance, layerData.ground))
             {
-                normalSum += hit.normal;
                 pointSum += hit.point;
-                hitPoints[hitCount] = hit.point;
+                stats.tempStats.hitPoints[hitCount] = hit.point;
                 hitCount++;
             }
         }
 
-        stats.tempStats.isGrounded = hitCount > 2;
+        stats.tempStats.isGrounded = hitCount > 0;
         if (stats.tempStats.isGrounded)
         {
             stats.tempStats.groundPoint = pointSum / hitCount;
@@ -352,7 +349,7 @@ public class PlayerBrain : MonoBehaviour
 
             for (int i = 0; i < hitCount; i++)
             {
-                stats.tempStats.groundPlaneCentroid += hitPoints[i];
+                stats.tempStats.groundPlaneCentroid += stats.tempStats.hitPoints[i];
             }
             stats.tempStats.groundPlaneCentroid /= hitCount;
 
@@ -360,9 +357,9 @@ public class PlayerBrain : MonoBehaviour
 
             for (int i = 0; i < hitCount; i++)
             {
-                Vector3 bitangent = hitPoints[i] - stats.tempStats.groundPlaneCentroid;
+                Vector3 bitangent = stats.tempStats.hitPoints[i] - stats.tempStats.groundPlaneCentroid;
                 int nextIndex = (i + 1) % hitCount;
-                Vector3 tangent = hitPoints[nextIndex] - stats.tempStats.groundPlaneCentroid;
+                Vector3 tangent = stats.tempStats.hitPoints[nextIndex] - stats.tempStats.groundPlaneCentroid;
                 planeNormal += Vector3.Cross(bitangent, tangent);
             }
 
@@ -386,18 +383,9 @@ public class PlayerBrain : MonoBehaviour
         if (capsuleCollider == null) return;
         Gizmos.color = Color.yellow;
 
-        Vector3[] offsets = new Vector3[]
+        for (int i = 0; i < stats.cacheStats.groundCheckOffsets.Length; i++)
         {
-            Vector3.zero,                                
-            new Vector3(capsuleCollider.radius, 0, 0f), 
-            new Vector3(-capsuleCollider.radius, 0f, 0f),
-            new Vector3(0f, 0f, capsuleCollider.radius), 
-            new Vector3(0f, 0f, -capsuleCollider.radius) 
-        };
-
-        for (int i = 0; i < offsets.Length; i++)
-        {
-            Vector3 start = capsuleCollider.bounds.center + offsets[i];
+            Vector3 start = capsuleCollider.bounds.center + stats.cacheStats.groundCheckOffsets[i];
 
             bool hit = Physics.Raycast(start, Vector3.down, settings.groundCheckDistance, layerData.ground);
 
