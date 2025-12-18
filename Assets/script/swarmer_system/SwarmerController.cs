@@ -1,5 +1,5 @@
 using UnityEngine;
-using DebugDrawer;
+using Proselyte.DebugDrawer;
 
 public class SwarmerController : MonoBehaviour
 {
