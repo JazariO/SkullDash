@@ -272,19 +272,15 @@ public class PlayerBrain : MonoBehaviour
 
         Vector3 curMoveVelocity = Vector3.Lerp(stats.tempStats.moveVelocity, stats.tempStats.targetVelocity, accel);
 
-        if (!stats.tempStats.isGrounded || slopeThreshold > 1 || stats.tempStats.curState == State.Jump)
+        if (slopeThreshold > 1 || stats.tempStats.curState == State.Jump || stats.tempStats.curState == State.Fall)
         {
-            if (!inputs.jumpHoldInput && stats.tempStats.moveVelocity.y > 0)
+            if (!inputs.jumpHoldInput && stats.tempStats.moveVelocity.y > 0 || stats.tempStats.moveVelocity.y < 0)
             {
-                stats.tempStats.curGravityMultiplier = settings.earlyFallGravMultiplier;
+                stats.tempStats.curGravityMultiplier = settings.fallGravMultiplier;
             }
             else if (stats.tempStats.moveVelocity.y > 0 && stats.tempStats.moveVelocity.y < settings.antiGravApexThreshold)
             {
                 stats.tempStats.curGravityMultiplier = settings.antiGravMultiplier;
-            }
-            else if (stats.tempStats.moveVelocity.y < 0)
-            {
-                stats.tempStats.curGravityMultiplier = settings.fallGravMultiplier;
             }
             else if (!stats.tempStats.isGrounded)
             {
@@ -319,11 +315,7 @@ public class PlayerBrain : MonoBehaviour
 
         stats.tempStats.speed = stats.tempStats.moveVelocity.magnitude;
         rigidBody.linearVelocity = stats.tempStats.moveVelocity + stats.tempStats.correctionForce;
-
-        if (stats.tempStats.moveVelocity != Vector3.zero)
-        {
-            DebugDraw.WireArrow(capsuleCollider.bounds.center, capsuleCollider.bounds.center + stats.tempStats.moveVelocity, Vector3.up, color: Color.red, fromFixedUpdate: true);
-        }
+        DebugDraw.WireArrow(capsuleCollider.bounds.center, capsuleCollider.bounds.center + stats.tempStats.moveVelocity, Vector3.up, color: Color.red, fromFixedUpdate: true);
     }
     private void GetGroundData()
     {
@@ -356,33 +348,36 @@ public class PlayerBrain : MonoBehaviour
         if (stats.tempStats.isGrounded)
         {
             stats.tempStats.groundPoint = pointSum / hitCount;
+            stats.tempStats.groundPlaneCentroid = Vector3.zero;
+
+            for (int i = 0; i < hitCount; i++)
+            {
+                stats.tempStats.groundPlaneCentroid += hitPoints[i];
+            }
+            stats.tempStats.groundPlaneCentroid /= hitCount;
+
+            Vector3 planeNormal = Vector3.zero;
+
+            for (int i = 0; i < hitCount; i++)
+            {
+                Vector3 bitangent = hitPoints[i] - stats.tempStats.groundPlaneCentroid;
+                int nextIndex = (i + 1) % hitCount;
+                Vector3 tangent = hitPoints[nextIndex] - stats.tempStats.groundPlaneCentroid;
+                planeNormal += Vector3.Cross(bitangent, tangent);
+            }
+
+            stats.tempStats.groundNormal = planeNormal.normalized;
         }
         else
         {
             stats.tempStats.groundPoint = Vector3.zero;
         }
 
-        stats.tempStats.groundPlaneCentroid = Vector3.zero;
 
-        for (int i = 0; i < hitCount; i++)
+        if (!float.IsNaN(stats.tempStats.groundPlaneCentroid.x))
         {
-            stats.tempStats.groundPlaneCentroid += hitPoints[i];
+            DebugDraw.WireQuad(stats.tempStats.groundPlaneCentroid, Quaternion.FromToRotation(Vector3.forward, stats.tempStats.groundNormal), Vector3.one, color: Color.red, fromFixedUpdate: true);
         }
-        stats.tempStats.groundPlaneCentroid /= hitCount;
-
-        Vector3 planeNormal = Vector3.zero;
-
-        for (int i = 0; i < hitCount; i++)
-        {
-            Vector3 bitangent = hitPoints[i] - stats.tempStats.groundPlaneCentroid;
-            int nextIndex = (i + 1) % hitCount;
-            Vector3 tangent = hitPoints[nextIndex] - stats.tempStats.groundPlaneCentroid;
-            planeNormal += Vector3.Cross(bitangent, tangent);
-        }
-
-        stats.tempStats.groundNormal = planeNormal.normalized;
-
-        DebugDraw.WireQuad(stats.tempStats.groundPlaneCentroid, Quaternion.FromToRotation(Vector3.forward, stats.tempStats.groundNormal), Vector3.one, color: Color.red, fromFixedUpdate: true);
     }
 
 

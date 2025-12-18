@@ -12,3 +12,25 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b8bb8f15276d4d4488ba0fec83ce4b0e, type: 3}
   m_Name: PlayerStatsSO
   m_EditorClassIdentifier: Assembly-CSharp::PlayerStatsSO
+  tempStats:
+    moveDirection: {x: 0, y: 0, z: 0, w: 0}
+    moveVelocity: {x: 0, y: 0, z: 0}
+    groundNormal: {x: 0, y: 0, z: 0}
+    groundPoint: {x: 0, y: 0, z: 0}
+    groundPlaneCentroid: {x: 0, y: 0, z: 0}
+    targetVelocity: {x: 0, y: 0, z: 0}
+    correctionForce: {x: 0, y: 0, z: 0}
+    curTargetSpeed: 0
+    lastJumpTime: 0
+    speed: 0
+    coyoteTimeElapsed: 0
+    curGravityMultiplier: 0
+    curPitch: 0
+    curYaw: 0
+    slope: 0
+    curAccel: 0
+    slopeDirection: 0
+    willJump: 0
+    coyoteJump: 0
+    isGrounded: 0
+    curState: 0
