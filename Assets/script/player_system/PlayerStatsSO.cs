@@ -6,32 +6,31 @@ public class PlayerStatsSO : ScriptableObject
 {
     [Serializable] public struct TempStats
     {     
-
-        public float curTargetSpeed;
+        public Quaternion moveDirection;
 
         public Vector3 moveVelocity;
-        public float speed;
-        public Quaternion moveDirection;
-        
-        public bool isGrounded;
-        
-        public bool willJump;
-        public float lastJumpTime;
-        public bool coyoteJump;
-        public float coyoteTimeElapsed;
-        public float curGravityMultiplier;
-        
-        public float curPitch;
-        public float curYaw;
-        
-        public float slope;
         public Vector3 groundNormal;
         public Vector3 groundPoint;
-        public Vector3 targetHorVelocity;
-        public float curAccel;
+        public Vector3 targetVelocity;
 
+        public float curTargetSpeed;
+        public float lastJumpTime;
+        public float speed;
+        public float coyoteTimeElapsed;
+        public float curGravityMultiplier;
+        public float curPitch;
+        public float curYaw;
+        public float slope;
+        public float curAccel;
+        public float slopeDirection;
+        public Vector3 curJumpForce;
+
+        public bool willJump;
+        public bool coyoteJump;
+        public bool isGrounded;
 
         public PlayerBrain.State curState;
+        
     }
     public TempStats tempStats;
 }

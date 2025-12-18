@@ -19,7 +19,7 @@ public class PlayerSettingsSO : ScriptableObject
     public float airAcceleration = 0.1f;
 
     [Tooltip("Initial upward velocity applied when jumping")]
-    public float jumpSpeed = 6;
+    public float jumpForce = 6;
 
     [Tooltip("Time window (in seconds) after pressing jump where the jump will still trigger before landing")]
     public float jumpBufferTime = 0.2f;
@@ -74,5 +74,5 @@ public class PlayerSettingsSO : ScriptableObject
 
     [Range(0, 90)]
     [Tooltip("The maximum angle in degrees the player can climb")]
-    public float slopeThreshold = 45;
+    public float slopeAngleThreshold = 45;
 }

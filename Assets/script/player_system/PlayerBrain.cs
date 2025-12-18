@@ -1,8 +1,8 @@
 using UnityEngine;
-
+using Proselyte.DebugDrawer;
 public class PlayerBrain : MonoBehaviour
 {
-    public enum State
+    public enum State : byte
     { 
         Idle,
         Walk,
@@ -47,9 +47,8 @@ public class PlayerBrain : MonoBehaviour
     {
         FixedUpdateState();
         FixedUpdateRotate();
-        UpdateHorizontalVelocity();
-        UpdateVerticalVelocity();
-        GetGroundHit();
+        UpdateVelocity();
+        GetGroundData();
     }
 
     private void OnDisable()
@@ -58,7 +57,7 @@ public class PlayerBrain : MonoBehaviour
     }
     private void SelectState()
     {   
-        if ((stats.tempStats.isGrounded && stats.tempStats.willJump) || (stats.tempStats.moveVelocity.y > 0 && inputs.jumpHoldInput && stats.tempStats.curState != State.Fall) || stats.tempStats.coyoteJump)
+        if ((stats.tempStats.isGrounded && stats.tempStats.willJump && stats.tempStats.slope > -1) || (stats.tempStats.moveVelocity.y > 0 && inputs.jumpHoldInput && stats.tempStats.curState != State.Fall) || stats.tempStats.coyoteJump)
         {
             SetState(State.Jump);
         }
@@ -111,7 +110,7 @@ public class PlayerBrain : MonoBehaviour
             break;
             case State.Jump:
             {
-                stats.tempStats.moveVelocity.y = settings.jumpSpeed;
+                stats.tempStats.curJumpForce = new Vector3(0, settings.jumpForce, 0);
                 stats.tempStats.coyoteTimeElapsed = settings.coyoteTime;
             }
             break;
@@ -191,7 +190,6 @@ public class PlayerBrain : MonoBehaviour
             case State.Jump:
             {
 
-
             }
             break;
             case State.Fall:
@@ -227,11 +225,11 @@ public class PlayerBrain : MonoBehaviour
             break;
             case State.Jump:
             {
-
             }
             break;
             case State.Fall:
             {
+                stats.tempStats.curJumpForce = Vector3.zero;
                 stats.tempStats.coyoteTimeElapsed = 0.0f;
                 stats.tempStats.coyoteJump = false;
             }
@@ -258,30 +256,25 @@ public class PlayerBrain : MonoBehaviour
         stats.tempStats.curPitch = Mathf.Clamp(stats.tempStats.curPitch, -settings.clampedPitch, settings.clampedPitch);
         cam.transform.localRotation = Quaternion.Euler(stats.tempStats.curPitch, 0, 0);
     }
-    private void UpdateHorizontalVelocity()
+    private void UpdateVelocity()
     {
         Vector3 forward = Vector3.ProjectOnPlane(transform.forward, stats.tempStats.groundNormal).normalized;
         Vector3 right = Vector3.ProjectOnPlane(transform.right, stats.tempStats.groundNormal).normalized;
+        Vector3 moveDir = forward * inputs.moveInput.y + right * inputs.moveInput.x;
 
-        Vector3 inputDir = forward * inputs.moveInput.y + right * inputs.moveInput.x;
-        stats.tempStats.targetHorVelocity = inputDir * stats.tempStats.curTargetSpeed;
+        float slopeThreshold = Vector3.Angle(stats.tempStats.groundNormal, Vector3.up) / settings.slopeAngleThreshold; // slope factor that finds the percentage of the ground angle compared to the angle threshold
+        Vector3 slopeDirection = Vector3.ProjectOnPlane(Vector3.down, stats.tempStats.groundNormal).normalized;
+        float slopeDot = Vector3.Dot(moveDir, slopeDirection); // -1 to 1 value to determine the angle of the ground relative to the movement direction
+        stats.tempStats.slope = slopeDot * slopeThreshold; // slope becomes a multiplier with 1 being the flat surface. less than one the slope is uphill, more than 1 the slope is downhill
+        stats.tempStats.targetVelocity = moveDir * stats.tempStats.curTargetSpeed * (1 + stats.tempStats.slope);
 
         float accel = (stats.tempStats.isGrounded ? settings.groundAcceleration : settings.airAcceleration) * Time.fixedDeltaTime;
 
-        stats.tempStats.moveVelocity.x = Mathf.Lerp(stats.tempStats.moveVelocity.x, stats.tempStats.targetHorVelocity.x, accel);
-        stats.tempStats.moveVelocity.z = Mathf.Lerp(stats.tempStats.moveVelocity.z, stats.tempStats.targetHorVelocity.z, accel);
-        stats.tempStats.speed = new Vector3(stats.tempStats.moveVelocity.x, 0, stats.tempStats.moveVelocity.z).magnitude;
-        rigidBody.linearVelocity = stats.tempStats.moveVelocity;
-    }
+        Vector3 curMoveVelocity = stats.tempStats.moveVelocity;
+        curMoveVelocity.y = 0;
+        curMoveVelocity = Vector3.Lerp(curMoveVelocity, stats.tempStats.targetVelocity, accel);
 
-    private void UpdateVerticalVelocity()
-    {
-        if (stats.tempStats.isGrounded && stats.tempStats.moveVelocity.y <= stats.tempStats.targetHorVelocity.y)
-        {
-            stats.tempStats.curGravityMultiplier = 0;
-            stats.tempStats.moveVelocity.y = stats.tempStats.targetHorVelocity.y;
-        }
-        else
+        if (!stats.tempStats.isGrounded || slopeThreshold > 1)
         {
             if (!inputs.jumpHoldInput && stats.tempStats.moveVelocity.y > 0)
             {
@@ -303,9 +296,19 @@ public class PlayerBrain : MonoBehaviour
             stats.tempStats.moveVelocity.y -= settings.gravity * stats.tempStats.curGravityMultiplier * Time.fixedDeltaTime;
             stats.tempStats.moveVelocity.y = Mathf.Max(stats.tempStats.moveVelocity.y, settings.maxFallSpeed);
         }
-    }
+        else
+        {
+            stats.tempStats.moveVelocity.y = curMoveVelocity.y;
+        }
 
-    private void GetGroundHit()
+        stats.tempStats.moveVelocity.x = curMoveVelocity.x;
+        stats.tempStats.moveVelocity.z = curMoveVelocity.z;
+        stats.tempStats.speed = stats.tempStats.moveVelocity.magnitude;
+        rigidBody.linearVelocity = stats.tempStats.moveVelocity + stats.tempStats.curJumpForce;
+
+        DebugDraw.WireArrow(capsuleCollider.bounds.center, capsuleCollider.bounds.center + stats.tempStats.moveVelocity, Vector3.up, fromFixedUpdate: true);
+    }
+    private void GetGroundData()
     {
         Vector3[] offsets =
         {
@@ -316,37 +319,31 @@ public class PlayerBrain : MonoBehaviour
             new Vector3(0, 0, -capsuleCollider.radius)
         };
 
-        RaycastHit closestHit = default;
-        float closestDistance = float.MaxValue;
-        bool hasGroundHit = false;
+        Vector3 normalSum = Vector3.zero;
+        Vector3 pointSum = Vector3.zero;
+        int hitCount = 0;
 
         for (int i = 0; i < offsets.Length; i++)
         {
             if (Physics.Raycast(capsuleCollider.bounds.center + offsets[i], Vector3.down, out RaycastHit hit, settings.groundCheckDistance, layerData.ground))
             {
-                hasGroundHit = true;
-
-                if (hit.distance < closestDistance)
-                {
-                    closestDistance = hit.distance;
-                    closestHit = hit;
-                }
+                normalSum += hit.normal;
+                pointSum += hit.point;
+                hitCount++;
             }
         }
 
-        if (hasGroundHit)
+        stats.tempStats.isGrounded = hitCount > 0;
+        if (stats.tempStats.isGrounded)
         {
-            stats.tempStats.groundNormal = closestHit.normal;
-            stats.tempStats.groundPoint = closestHit.point;
+            stats.tempStats.groundNormal = normalSum.normalized;
+            stats.tempStats.groundPoint = pointSum / hitCount;
         }
         else
         {
             stats.tempStats.groundNormal = Vector3.up;
             stats.tempStats.groundPoint = Vector3.zero;
         }
-
-        stats.tempStats.isGrounded = hasGroundHit;
-        stats.tempStats.slope = Vector3.Angle(stats.tempStats.groundNormal, Vector3.up);
     }
 
 
@@ -373,6 +370,10 @@ public class PlayerBrain : MonoBehaviour
             Gizmos.color = hit ? Color.red : Color.blue;
             Gizmos.DrawLine(start, start + Vector3.down * settings.groundCheckDistance);
         }
+
+
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawRay(transform.position, stats.tempStats.groundNormal);
     }
 
 }
