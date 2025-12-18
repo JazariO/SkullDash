@@ -11,7 +11,11 @@ public class PlayerStatsSO : ScriptableObject
         public Vector3 moveVelocity;
         public Vector3 groundNormal;
         public Vector3 groundPoint;
+        public Vector3 worldCentroid;
+        public Vector3 groundDistance;
         public Vector3 targetVelocity;
+        public Vector3 curJumpForce;
+        public Vector3 correctionForce;
 
         public float curTargetSpeed;
         public float lastJumpTime;
@@ -23,7 +27,6 @@ public class PlayerStatsSO : ScriptableObject
         public float slope;
         public float curAccel;
         public float slopeDirection;
-        public Vector3 curJumpForce;
 
         public bool willJump;
         public bool coyoteJump;

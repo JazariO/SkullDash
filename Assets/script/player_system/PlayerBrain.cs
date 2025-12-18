@@ -1,5 +1,6 @@
 using UnityEngine;
 using Proselyte.DebugDrawer;
+using TMPro;
 public class PlayerBrain : MonoBehaviour
 {
     public enum State : byte
@@ -302,11 +303,21 @@ public class PlayerBrain : MonoBehaviour
         {
             stats.tempStats.moveVelocity.y = curMoveVelocity.y;
         }
-
-            stats.tempStats.moveVelocity.x = curMoveVelocity.x;
+        stats.tempStats.moveVelocity.x = curMoveVelocity.x;
         stats.tempStats.moveVelocity.z = curMoveVelocity.z;
+
         stats.tempStats.speed = stats.tempStats.moveVelocity.magnitude;
-        rigidBody.linearVelocity = stats.tempStats.moveVelocity + stats.tempStats.curJumpForce;
+
+        if (capsuleCollider.bounds.center.y - stats.tempStats.worldCentroid.y < settings.groundCheckDistance * 0.5)
+        {
+            stats.tempStats.correctionForce = Vector3.up;
+        }
+        else
+        {
+            stats.tempStats.correctionForce = Vector3.zero;
+
+        }
+            rigidBody.linearVelocity = stats.tempStats.moveVelocity + stats.tempStats.curJumpForce + stats.tempStats.correctionForce;
 
         DebugDraw.WireArrow(capsuleCollider.bounds.center, capsuleCollider.bounds.center + stats.tempStats.moveVelocity, Vector3.up, color: Color.red, fromFixedUpdate: true);
     }
@@ -325,12 +336,14 @@ public class PlayerBrain : MonoBehaviour
         Vector3 pointSum = Vector3.zero;
         int hitCount = 0;
 
+        Vector3[] hitPoints = new Vector3[offsets.Length];
         for (int i = 0; i < offsets.Length; i++)
         {
             if (Physics.Raycast(capsuleCollider.bounds.center + offsets[i], Vector3.down, out RaycastHit hit, settings.groundCheckDistance, layerData.ground))
             {
                 normalSum += hit.normal;
                 pointSum += hit.point;
+                hitPoints[hitCount] = hit.point;
                 hitCount++;
             }
         }
@@ -338,14 +351,34 @@ public class PlayerBrain : MonoBehaviour
         stats.tempStats.isGrounded = hitCount > 0;
         if (stats.tempStats.isGrounded)
         {
-            stats.tempStats.groundNormal = normalSum.normalized;
             stats.tempStats.groundPoint = pointSum / hitCount;
         }
         else
         {
-            stats.tempStats.groundNormal = Vector3.up;
             stats.tempStats.groundPoint = Vector3.zero;
         }
+
+        stats.tempStats.worldCentroid = Vector3.zero;
+
+        for (int i = 0; i < hitCount; i++)
+        {
+            stats.tempStats.worldCentroid += hitPoints[i];
+        }
+        stats.tempStats.worldCentroid /= hitCount;
+
+        Vector3 planeNormal = Vector3.zero;
+
+        for (int i = 0; i < hitCount; i++)
+        {
+            Vector3 bitangent = hitPoints[i] - stats.tempStats.worldCentroid;
+            int nextIndex = (i + 1) % hitCount;
+            Vector3 tangent = hitPoints[nextIndex] - stats.tempStats.worldCentroid;
+            planeNormal += Vector3.Cross(bitangent, tangent);
+        }
+
+        stats.tempStats.groundNormal = planeNormal.normalized;
+
+        DebugDraw.WireQuad(stats.tempStats.worldCentroid, Quaternion.FromToRotation(Vector3.forward, stats.tempStats.groundNormal), Vector3.one, color: Color.red, fromFixedUpdate: true);
     }
 
 
@@ -375,7 +408,6 @@ public class PlayerBrain : MonoBehaviour
 
 
         Gizmos.color = Color.yellow;
-        Gizmos.DrawRay(transform.position, stats.tempStats.groundNormal);
     }
 
 }
