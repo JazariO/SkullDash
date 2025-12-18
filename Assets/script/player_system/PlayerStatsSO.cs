@@ -14,7 +14,6 @@ public class PlayerStatsSO : ScriptableObject
         public Vector3 groundPlaneCentroid;
         public Vector3 groundDistance;
         public Vector3 targetVelocity;
-        public Vector3 curJumpForce;
         public Vector3 correctionForce;
 
         public float curTargetSpeed;

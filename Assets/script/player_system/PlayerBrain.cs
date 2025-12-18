@@ -111,7 +111,7 @@ public class PlayerBrain : MonoBehaviour
             break;
             case State.Jump:
             {
-                stats.tempStats.curJumpForce = new Vector3(0, settings.jumpForce, 0);
+                stats.tempStats.moveVelocity.y += settings.jumpForce;
                 stats.tempStats.coyoteTimeElapsed = settings.coyoteTime;
             }
             break;
@@ -230,7 +230,6 @@ public class PlayerBrain : MonoBehaviour
             break;
             case State.Fall:
             {
-                stats.tempStats.curJumpForce = Vector3.zero;
                 stats.tempStats.coyoteTimeElapsed = 0.0f;
                 stats.tempStats.coyoteJump = false;
             }
@@ -273,7 +272,7 @@ public class PlayerBrain : MonoBehaviour
 
         Vector3 curMoveVelocity = Vector3.Lerp(stats.tempStats.moveVelocity, stats.tempStats.targetVelocity, accel);
 
-        if (!stats.tempStats.isGrounded || slopeThreshold > 1)
+        if (!stats.tempStats.isGrounded || slopeThreshold > 1 || stats.tempStats.curState == State.Jump)
         {
             if (!inputs.jumpHoldInput && stats.tempStats.moveVelocity.y > 0)
             {
@@ -294,6 +293,8 @@ public class PlayerBrain : MonoBehaviour
 
             stats.tempStats.moveVelocity.y -= settings.gravity * stats.tempStats.curGravityMultiplier * Time.fixedDeltaTime;
             stats.tempStats.moveVelocity.y = Mathf.Max(stats.tempStats.moveVelocity.y, settings.maxFallSpeed);
+
+            stats.tempStats.correctionForce = Vector3.zero;
         }
         else if (stats.tempStats.slope == 0)
         {
@@ -317,7 +318,7 @@ public class PlayerBrain : MonoBehaviour
 
 
         stats.tempStats.speed = stats.tempStats.moveVelocity.magnitude;
-        rigidBody.linearVelocity = stats.tempStats.moveVelocity + stats.tempStats.curJumpForce + stats.tempStats.correctionForce;
+        rigidBody.linearVelocity = stats.tempStats.moveVelocity + stats.tempStats.correctionForce;
 
         if (stats.tempStats.moveVelocity != Vector3.zero)
         {
