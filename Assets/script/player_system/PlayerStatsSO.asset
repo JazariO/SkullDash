@@ -13,13 +13,14 @@ MonoBehaviour:
   m_Name: PlayerStatsSO
   m_EditorClassIdentifier: Assembly-CSharp::PlayerStatsSO
   tempStats:
+    hitPoints: []
     moveDirection: {x: 0, y: 0, z: 0, w: 0}
     moveVelocity: {x: 0, y: 0, z: 0}
     groundNormal: {x: 0, y: 0, z: 0}
     groundPoint: {x: 0, y: 0, z: 0}
     groundPlaneCentroid: {x: 0, y: 0, z: 0}
     targetVelocity: {x: 0, y: 0, z: 0}
-    correctionForce: {x: 0, y: 0, z: 0}
+    correctionForce: 0
     curTargetSpeed: 0
     lastJumpTime: 0
     speed: 0
@@ -34,3 +35,10 @@ MonoBehaviour:
     coyoteJump: 0
     isGrounded: 0
     curState: 0
+  cacheStats:
+    groundCheckOffsets:
+    - {x: 0, y: 0, z: 0}
+    - {x: 0.4, y: 0, z: 0}
+    - {x: -0.4, y: 0, z: 0}
+    - {x: 0, y: 0, z: 0.4}
+    - {x: 0, y: 0, z: -0.4}
