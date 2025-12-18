@@ -12,7 +12,7 @@
       "depth": 0,
       "source": "git",
       "dependencies": {},
-      "hash": "8ab4f08801b9022aa240933b62e4cd725093c019"
+      "hash": "871461c703b94f3eea503e8c17ab172bdace10d9"
     },
     "com.proselyte.sigils": {
       "version": "https://github.com/JazariO/Sigils.git",
