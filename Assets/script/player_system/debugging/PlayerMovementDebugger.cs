@@ -1,6 +1,7 @@
 using Proselyte.DebugDrawer;
 using UnityEngine;
 
+#if UNITY_EDITOR
 public class PlayerMovementDebugger : MonoBehaviour
 {
     [SerializeField] PlayerStatsSO player_stats_SO;
@@ -12,15 +13,22 @@ public class PlayerMovementDebugger : MonoBehaviour
         public bool grounded;
         public bool initialized;
     }
-    [SerializeField] DebugData[] debug_data = new DebugData[data_size];
+    private DebugData[] debug_data;
+
     [SerializeField] bool debug_enabled = true;
-    private const int data_size = 18;
-    private int debug_max_tick = 10; // frames per tick
+    
+    [SerializeField, Tooltip("How many historical frames to track.")] 
+    int data_size = 18;
+
+    [SerializeField, Tooltip("Number of fixedupdate frames between redrawing debug shapes.")]
+    private int debug_max_tickrate = 10; // frames per tick
     private int debug_counter = 0;
     private int debug_tick_counter = 0;
 
     private void Start()
     {
+        DebugData[] debug_data = new DebugData[data_size];
+        
         // Initialize debug_data
         for(int i = 0; i < debug_data.Length; i++)
         {
@@ -38,7 +46,7 @@ public class PlayerMovementDebugger : MonoBehaviour
         if(!debug_enabled) return;
 
         debug_tick_counter++;
-        if(debug_tick_counter >= debug_max_tick)
+        if(debug_tick_counter >= debug_max_tickrate)
         {
             // Sample current player status data
             DebugData current_data = new DebugData
@@ -91,3 +99,4 @@ public class PlayerMovementDebugger : MonoBehaviour
         }
     }
 }
+#endif //UNITY_EDITOR
