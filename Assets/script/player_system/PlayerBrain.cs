@@ -12,6 +12,7 @@ public class PlayerBrain : MonoBehaviour
         Jump,
         Fall,
         Slide,
+        Crouch,
     }
 
     [Header("Scriptable Objects")]
@@ -27,7 +28,6 @@ public class PlayerBrain : MonoBehaviour
     [SerializeField] CapsuleCollider capsuleCollider;
     [SerializeField] Camera cam;
 
-
     private void OnValidate()
     {
         stats.tempStats.bottomCapsuleCenter = new Vector3(capsuleCollider.bounds.center.x, capsuleCollider.bounds.min.y + settings.groundCheckOrigin, capsuleCollider.bounds.center.z);
@@ -38,7 +38,6 @@ public class PlayerBrain : MonoBehaviour
         stats.tempStats.lastSlideTime = -settings.slideBufferTime;
         stats.tempStats.curYaw = transform.eulerAngles.y;
         stats.tempStats.moveRotationQuaternion = Quaternion.identity;
-        stats.tempStats.curStepTheshold = settings.stepThreshold;
 
         float groundCheckOffset = capsuleCollider.radius * settings.groundCheckRadius;
 
@@ -73,8 +72,12 @@ public class PlayerBrain : MonoBehaviour
         stats.tempStats = default;
     }
     private void ChooseState()
-    {   
-        if ((stats.tempStats.isGrounded && stats.tempStats.willJump && stats.tempStats.slope < 1) || (stats.tempStats.moveVelocity.y > 0 && inputs.jumpHoldInput && stats.tempStats.curState != State.Fall && stats.tempStats.correctionForce == 0) || stats.tempStats.coyoteJump)
+    {
+        bool startJump = stats.tempStats.isGrounded && stats.tempStats.willJump && stats.tempStats.slope < 1;
+        bool jumpingInAir = stats.tempStats.moveVelocity.y > 0 && inputs.jumpHoldInput && stats.tempStats.curState != State.Fall && stats.tempStats.correctionForce == 0;
+        bool stillSliding = inputs.crouchHoldInput && stats.tempStats.speed > settings.minimumSlideSpeed && stats.tempStats.curState != State.Crouch;
+
+        if (startJump || jumpingInAir || stats.tempStats.coyoteJump)
         {
             SetState(State.Jump);
         }
@@ -82,9 +85,13 @@ public class PlayerBrain : MonoBehaviour
         {
             SetState(State.Fall);
         }
-        else if (stats.tempStats.willSlide || inputs.crouchHoldInput)
+        else if (stats.tempStats.willSlide || stillSliding)
         {
             SetState(State.Slide);
+        }
+        else if (inputs.crouchHoldInput)
+        {
+            SetState(State.Crouch);
         }
         else if (inputs.sprintInput && inputs.moveInput != Vector2.zero)
         {
@@ -141,10 +148,21 @@ public class PlayerBrain : MonoBehaviour
                 capsuleCollider.height = trueHeight;
                 float yOffset = Mathf.Min(trueHeight * 0.5f - 1, capsuleCollider.radius * 2);
                 capsuleCollider.center = new Vector3(capsuleCollider.center.x, yOffset, capsuleCollider.center.z);
-                cam.transform.localPosition = new Vector3(0, yOffset, 0);
+                cam.transform.localPosition = new Vector3(0, yOffset * 2, 0);
 
-                stats.tempStats.moveVelocity.x = settings.slideSpeed * stats.tempStats.moveDirection.x;
-                stats.tempStats.moveVelocity.z = settings.slideSpeed * stats.tempStats.moveDirection.z;
+
+                stats.tempStats.moveVelocity = settings.slideSpeed * stats.tempStats.moveDirection;
+                stats.tempStats.curTargetSpeed = 0;
+            }
+            break;
+            case State.Crouch:
+            {
+                float trueHeight = Mathf.Max(settings.slideHeight, capsuleCollider.radius * 2);
+                capsuleCollider.height = trueHeight;
+                float yOffset = Mathf.Min(trueHeight * 0.5f - 1, capsuleCollider.radius * 2);
+                capsuleCollider.center = new Vector3(capsuleCollider.center.x, yOffset, capsuleCollider.center.z);
+                cam.transform.localPosition = new Vector3(0, yOffset * 2, 0);
+
                 stats.tempStats.curTargetSpeed = settings.crouchSpeed;
             }
             break;
@@ -200,19 +218,19 @@ public class PlayerBrain : MonoBehaviour
         {
             case State.Idle:
             {
-                GroundedVerticalVelocity();
+                GroundedVerticalVelocity(settings.groundAcceleration);
                 HorizontalVelocity(settings.groundAcceleration);
             }
             break;
             case State.Walk:
             {
-                GroundedVerticalVelocity();
+                GroundedVerticalVelocity(settings.groundAcceleration);
                 HorizontalVelocity(settings.groundAcceleration);
             }
             break;
             case State.Run:
             {
-                GroundedVerticalVelocity();
+                GroundedVerticalVelocity(settings.groundAcceleration);
                 HorizontalVelocity(settings.groundAcceleration);
             }
             break;
@@ -224,14 +242,20 @@ public class PlayerBrain : MonoBehaviour
             break;
             case State.Fall:
             {
-                AirborneVerticalVelocity(gravityMultiplier: settings.fallGravMultiplier);
+                AirborneVerticalVelocity(settings.fallGravMultiplier);
                 HorizontalVelocity(settings.airAcceleration);
             }
             break;
             case State.Slide:
             {
-                GroundedVerticalVelocity();
+                GroundedVerticalVelocity(settings.slideAccelation);
                 HorizontalVelocity(settings.slideAccelation);
+            }
+            break;
+            case State.Crouch:
+            {
+                GroundedVerticalVelocity(settings.groundAcceleration);
+                HorizontalVelocity(settings.groundAcceleration);
             }
             break;
 
@@ -274,6 +298,13 @@ public class PlayerBrain : MonoBehaviour
                 cam.transform.localPosition = Vector3.zero;
             }
             break;
+            case State.Crouch:
+            {
+                capsuleCollider.height = settings.standingHeight;
+                capsuleCollider.center = Vector3.zero;
+                cam.transform.localPosition = Vector3.zero;
+            }
+            break;
         }
     }
     private void FixedUpdateRotate()
@@ -309,8 +340,8 @@ public class PlayerBrain : MonoBehaviour
         stats.tempStats.moveVelocity.x = Mathf.Lerp(stats.tempStats.moveVelocity.x, stats.tempStats.targetVelocity.x, accel);
         stats.tempStats.moveVelocity.z = Mathf.Lerp(stats.tempStats.moveVelocity.z, stats.tempStats.targetVelocity.z, accel);
         stats.tempStats.speed = stats.tempStats.moveVelocity.magnitude;
-
-       // DebugDraw.WireArrow(capsuleCollider.bounds.center, capsuleCollider.bounds.center + stats.tempStats.moveVelocity, Vector3.up, color: Color.red, fromFixedUpdate: true);
+        
+        if (stats.tempStats.moveVelocity != Vector3.zero) DebugDraw.WireArrow(capsuleCollider.bounds.center, capsuleCollider.bounds.center + stats.tempStats.moveVelocity, Vector3.up, color: Color.red, fromFixedUpdate: true);
     }
     private void AirborneVerticalVelocity(float gravityMultiplier = 1)
     {
@@ -318,8 +349,7 @@ public class PlayerBrain : MonoBehaviour
         stats.tempStats.moveVelocity.y -= gravity;
         stats.tempStats.moveVelocity.y = Mathf.Max(stats.tempStats.moveVelocity.y, settings.maxFallSpeed);
     }
-
-    private void GroundedVerticalVelocity()
+    private void GroundedVerticalVelocity(float accellation)
     {
         if (stats.tempStats.slope == 0)
         {
@@ -329,6 +359,7 @@ public class PlayerBrain : MonoBehaviour
                 stats.tempStats.correctionForce = settings.correctionSpeed * (1 - (distanceFromGround / settings.stepThreshold));
                 stats.tempStats.moveVelocity.y += stats.tempStats.correctionForce;
             }
+
             else
             {
                 stats.tempStats.correctionForce = 0;
@@ -337,7 +368,7 @@ public class PlayerBrain : MonoBehaviour
         }
         else
         {
-            stats.tempStats.moveVelocity.y = Mathf.Lerp(stats.tempStats.moveVelocity.y, stats.tempStats.targetVelocity.y, settings.groundAcceleration * Time.fixedDeltaTime);
+            stats.tempStats.moveVelocity.y = Mathf.Lerp(stats.tempStats.moveVelocity.y, stats.tempStats.targetVelocity.y, accellation * Time.fixedDeltaTime);
         }
 
     }
@@ -349,18 +380,23 @@ public class PlayerBrain : MonoBehaviour
 
         for (int i = 0; i < stats.cacheStats.groundCheckOffsets.Length; i++)
         {
-            if (Physics.Raycast(stats.tempStats.bottomCapsuleCenter + stats.cacheStats.groundCheckOffsets[i], Vector3.down, out RaycastHit hit, settings.groundCheckDistance, layerData.ground))
+            if (Physics.Raycast(stats.tempStats.bottomCapsuleCenter + stats.cacheStats.groundCheckOffsets[i], Vector3.down, out RaycastHit groundNormalHit, settings.groundCheckDistance, layerData.ground))
             {
-                pointSum += hit.point;
-                stats.tempStats.hitPoints[hitCount] = hit.point;
+                pointSum += groundNormalHit.point;
+                stats.tempStats.hitPoints[hitCount] = groundNormalHit.point;
                 hitCount++;
             }
-
-            if (Physics.Raycast(stats.tempStats.bottomCapsuleCenter + stats.cacheStats.groundCheckOffsets[i], Vector3.down, out RaycastHit groundHit, settings.groundCheckDistance, layerData.ground))
+            if (Physics.Raycast(stats.tempStats.bottomCapsuleCenter + stats.cacheStats.groundCheckOffsets[i], Vector3.down, out RaycastHit groundCheckHit, settings.stepThreshold, layerData.ground))
             {
-
+                stats.tempStats.isGrounded = true;
             }
+            else if (i == stats.cacheStats.groundCheckOffsets.Length - 1)
+            {
+                stats.tempStats.isGrounded = false;
+            }
+
         }
+
         if (stats.tempStats.isGrounded)
         {
             stats.tempStats.groundPlaneCentroid = Vector3.zero;
@@ -394,6 +430,7 @@ public class PlayerBrain : MonoBehaviour
     private void OnDrawGizmosSelected()
     {
         if (capsuleCollider == null) return;
+        Gizmos.color = Color.yellow;
 
         for (int i = 0; i < stats.cacheStats.groundCheckOffsets.Length; i++)
         {
@@ -401,14 +438,10 @@ public class PlayerBrain : MonoBehaviour
 
             bool hit = Physics.Raycast(start, Vector3.down, settings.groundCheckDistance, layerData.ground);
 
-            Gizmos.color = hit ? Color.green : Color.red;
+            Gizmos.color = hit ? Color.red : Color.blue;
             Gizmos.DrawLine(start, start + Vector3.down * settings.groundCheckDistance);
         }
-
-        Gizmos.color = stats.tempStats.isGrounded ? Color.cyan : Color.orange;
-        Gizmos.DrawLine(stats.tempStats.bottomCapsuleCenter, stats.tempStats.bottomCapsuleCenter + Vector3.down * settings.stepThreshold);
     }
-
     private void OnDrawGizmos()
     {
         Gizmos.color = Color.red;

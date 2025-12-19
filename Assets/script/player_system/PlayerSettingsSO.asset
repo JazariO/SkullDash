@@ -22,6 +22,9 @@ MonoBehaviour:
   slideHeight: 0.5
   standingHeight: 2
   slideSpeed: 20
+  slideAccelation: 2
+  crouchSpeed: 1
+  minimumSlideSpeed: 0.05
   coyoteTime: 0.1
   clampedPitch: 70
   gravity: 12
@@ -29,7 +32,8 @@ MonoBehaviour:
   fallGravMultiplier: 3.76
   groundCheckRadius: 0.8
   groundCheckOrigin: 0.37
-  groundCheckDistance: 0.87
+  groundCheckDistance: 2
+  stepThreshold: 0.7
   wallCheckDistance: 0.5
-  correctionSpeed: 1.54
-  slopeAngleThreshold: 75
+  correctionSpeed: 2
+  slopeAngleThreshold: 67.8

@@ -42,6 +42,9 @@ public class PlayerSettingsSO : ScriptableObject
     [Tooltip("Movement speed when crouching")]
     public float crouchSpeed = 0.1f;
 
+    [Tooltip("Minimum speed to still be sliding")]
+    public float minimumSlideSpeed = 0.01f;
+
     [Tooltip("Time window (in seconds) while falling where the jump will still trigger")]
     public float coyoteTime = 0.3f;
 

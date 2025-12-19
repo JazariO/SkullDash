@@ -41,7 +41,6 @@ public class PlayerStatsSO : ScriptableObject
     [Serializable] public struct CacheStats
     {
         public Vector3[] groundCheckOffsets;
-        public Vector3[] wallCheckOffsets;
     }
     public CacheStats cacheStats;
 }

@@ -152,10 +152,11 @@ GameObject:
   - component: {fileID: 8718416935759330110}
   - component: {fileID: 697316521878957903}
   - component: {fileID: 1602587143551133622}
+  - component: {fileID: 4786943739759103707}
   m_Layer: 6
   m_Name: Player
   m_TagString: Player
-  m_Icon: {fileID: 0}
+  m_Icon: {fileID: 5132851093641282708, guid: 0000000000000000d000000000000000, type: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
@@ -190,7 +191,7 @@ MeshRenderer:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3006247736153090160}
-  m_Enabled: 1
+  m_Enabled: 0
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
@@ -302,6 +303,20 @@ MonoBehaviour:
   rigidBody: {fileID: 697316521878957903}
   capsuleCollider: {fileID: 8718416935759330110}
   cam: {fileID: 2825151893307809474}
+--- !u!114 &4786943739759103707
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3006247736153090160}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bfbec1bcf62fe0746a7715d938b3ebea, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerMovementDebugger
+  player_stats_SO: {fileID: 11400000, guid: de320b30045c170489d39e0ed866f86c, type: 2}
+  debug_enabled: 1
 --- !u!1 &8507030332345504493
 GameObject:
   m_ObjectHideFlags: 0
