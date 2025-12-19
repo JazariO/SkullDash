@@ -293,7 +293,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 621139867743cd145b3614c9bf981e82, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerBrain
-  gameEventDataSO: {fileID: 11400000, guid: 2e27f7de7ec27a540ab75957d42699a1, type: 2}
+  gameEventData: {fileID: 11400000, guid: 2e27f7de7ec27a540ab75957d42699a1, type: 2}
   settings: {fileID: 11400000, guid: 07b31df588051e04d836a2177b133ff4, type: 2}
   stats: {fileID: 11400000, guid: de320b30045c170489d39e0ed866f86c, type: 2}
   inputs: {fileID: 11400000, guid: f066dad57d679fc46bde5fd5b502ebc7, type: 2}

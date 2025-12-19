@@ -44,20 +44,13 @@ public class PlayerSettingsSO : ScriptableObject
     [Tooltip("Maximum downward velocity the player can reach while falling")]
     public float maxFallSpeed = 10;
 
-    [Range(0, 1)]
-    [Tooltip("Multiplier applied to gravity near the jump apex (lower values create a floatier jump)")]
-    public float antiGravMultiplier = 0.5f;
-
-    [Tooltip("Vertical speed threshold around the jump apex where reduced gravity is applied")]
-    public float antiGravApexThreshold = 1;
-
     [Range(1, 5)]
     [Tooltip("How rapidly the players falls speed increases")]
     public float fallGravMultiplier = 1.5f;
 
 
-    //GROUND CHECK SETTINGS
-    [Header("Ground Check Settings")]
+    //COLLISION CHECK SETTINGS
+    [Header("Collision Check Settings")]
 
     [Tooltip("Radius of the sphere used to detect the ground")]
     public float groundCheckRadius = 0.9f;
@@ -68,10 +61,12 @@ public class PlayerSettingsSO : ScriptableObject
     [Tooltip("Distance of the ground check")]
     public float groundCheckDistance = 1;
 
+    [Tooltip("Distance of the wall check")]
+    public float wallCheckDistance = 0.5f;
+
     [Range(1, 5)]
     [Tooltip("The speed it takes to correct the distance from the ground")]
     public float correctionSpeed = 2;
-
 
     [Range(0, 90)]
     [Tooltip("The maximum angle in degrees the player can climb")]

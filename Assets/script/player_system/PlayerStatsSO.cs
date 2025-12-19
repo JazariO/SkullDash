@@ -10,7 +10,6 @@ public class PlayerStatsSO : ScriptableObject
         public Quaternion moveDirection;
         public Vector3 moveVelocity;
         public Vector3 groundNormal;
-        public Vector3 groundPoint;
         public Vector3 groundPlaneCentroid;
         public Vector3 targetVelocity;
         public float correctionForce;
@@ -19,7 +18,6 @@ public class PlayerStatsSO : ScriptableObject
         public float lastJumpTime;
         public float speed;
         public float coyoteTimeElapsed;
-        public float curGravityMultiplier;
         public float curPitch;
         public float curYaw;
         public float slope;
@@ -38,6 +36,7 @@ public class PlayerStatsSO : ScriptableObject
     [Serializable] public struct CacheStats
     {
         public Vector3[] groundCheckOffsets;
+        public Vector3[] wallCheckOffsets;
     }
     public CacheStats cacheStats;
 }

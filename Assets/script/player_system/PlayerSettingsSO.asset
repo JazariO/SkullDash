@@ -15,18 +15,17 @@ MonoBehaviour:
   walkSpeed: 8
   runSpeed: 15
   groundAcceleration: 10
-  airAcceleration: 5
-  jumpForce: 12
+  airAcceleration: 10
+  jumpForce: 4
   jumpBufferTime: 0.1
   coyoteTime: 0.1
   clampedPitch: 70
-  gravity: 12
-  maxFallSpeed: -10
-  antiGravMultiplier: 0.554
-  antiGravApexThreshold: 1
-  fallGravMultiplier: 2.83
+  gravity: 9
+  maxFallSpeed: -20
+  fallGravMultiplier: 1
   groundCheckRadius: 0.8
   groundCheckOrigin: 0.5
   groundCheckDistance: 1.5
-  correctionSpeed: 5
-  slopeAngleThreshold: 56.7
+  wallCheckDistance: 0.5
+  correctionSpeed: 3.67
+  slopeAngleThreshold: 75
