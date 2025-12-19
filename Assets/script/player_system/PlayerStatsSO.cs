@@ -7,15 +7,18 @@ public class PlayerStatsSO : ScriptableObject
     [Serializable] public struct TempStats
     {
         public Vector3[] hitPoints;
-        public Quaternion moveDirection;
+        public Quaternion moveRotationQuaternion;
+        public Vector3 moveDirection;
         public Vector3 moveVelocity;
         public Vector3 groundNormal;
         public Vector3 groundPlaneCentroid;
         public Vector3 targetVelocity;
-        public float correctionForce;
+        public Vector3 bottomCapsuleCenter;
 
+        public float correctionForce;
         public float curTargetSpeed;
         public float lastJumpTime;
+        public float lastSlideTime;
         public float speed;
         public float coyoteTimeElapsed;
         public float curPitch;
@@ -23,8 +26,10 @@ public class PlayerStatsSO : ScriptableObject
         public float slope;
         public float curAccel;
         public float slopeDirection;
-
+        public float curCameraYOffset;
+        public float curStepTheshold;
         public bool willJump;
+        public bool willSlide;
         public bool coyoteJump;
         public bool isGrounded;
 

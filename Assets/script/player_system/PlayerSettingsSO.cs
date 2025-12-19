@@ -24,6 +24,24 @@ public class PlayerSettingsSO : ScriptableObject
     [Tooltip("Time window (in seconds) after pressing jump where the jump will still trigger before landing")]
     public float jumpBufferTime = 0.2f;
 
+    [Tooltip("Time window (in seconds) after pressing slide where the slide will still trigger before landing")]
+    public float slideBufferTime = 0.1f;
+
+    [Tooltip("The height of the collider when sliding")]
+    public float slideHeight = 1f;
+
+    [Tooltip("The height of the collider when standing")]
+    public float standingHeight = 2f;
+
+    [Tooltip("Movement speed when sliding")]
+    public float slideSpeed = 6;
+
+    [Tooltip("How long it take to slow down when sliding")]
+    public float slideAccelation = 1;
+
+    [Tooltip("Movement speed when crouching")]
+    public float crouchSpeed = 0.1f;
+
     [Tooltip("Time window (in seconds) while falling where the jump will still trigger")]
     public float coyoteTime = 0.3f;
 
@@ -60,6 +78,9 @@ public class PlayerSettingsSO : ScriptableObject
 
     [Tooltip("Distance of the ground check")]
     public float groundCheckDistance = 1;
+
+    [Tooltip("Maximum step height")]
+    public float stepThreshold = 0.3f;
 
     [Tooltip("Distance of the wall check")]
     public float wallCheckDistance = 0.5f;

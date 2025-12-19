@@ -12,20 +12,24 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2ac0ecc2c6109714fa47f9a79f4e02d7, type: 3}
   m_Name: PlayerSettingsSO
   m_EditorClassIdentifier: Assembly-CSharp::PlayerSettingsSO
-  walkSpeed: 8
-  runSpeed: 15
+  walkSpeed: 5
+  runSpeed: 12
   groundAcceleration: 10
   airAcceleration: 10
-  jumpForce: 4
+  jumpForce: 8
   jumpBufferTime: 0.1
+  slideBufferTime: 0.1
+  slideHeight: 0.5
+  standingHeight: 2
+  slideSpeed: 20
   coyoteTime: 0.1
   clampedPitch: 70
-  gravity: 9
+  gravity: 12
   maxFallSpeed: -20
-  fallGravMultiplier: 1
+  fallGravMultiplier: 3.76
   groundCheckRadius: 0.8
-  groundCheckOrigin: 0.5
-  groundCheckDistance: 1.5
+  groundCheckOrigin: 0.37
+  groundCheckDistance: 0.87
   wallCheckDistance: 0.5
-  correctionSpeed: 3.67
+  correctionSpeed: 1.54
   slopeAngleThreshold: 75
