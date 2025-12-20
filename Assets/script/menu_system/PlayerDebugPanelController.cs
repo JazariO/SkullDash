@@ -26,9 +26,9 @@ public class PlayerDebugPanelController : MonoBehaviour
         move_velocity_TMP.text          = $"move vel | ({player_stats_SO.tempStats.moveVelocity.x:F2}, " +
                                                      $"{player_stats_SO.tempStats.moveVelocity.y:F2}, " +
                                                      $"{player_stats_SO.tempStats.moveVelocity.z:F2})";
-        move_direction_TMP.text         = $"move dir | ({player_stats_SO.tempStats.moveDirection.eulerAngles.x:F2}, " +
-                                                     $"{player_stats_SO.tempStats.moveDirection.eulerAngles.y:F2}, " +
-                                                     $"{player_stats_SO.tempStats.moveDirection.eulerAngles.z:F2})";
+        move_direction_TMP.text         = $"move dir | ({player_stats_SO.tempStats.moveRotationQuaternion.eulerAngles.x:F2}, " +
+                                                     $"{player_stats_SO.tempStats.moveRotationQuaternion.eulerAngles.y:F2}, " +
+                                                     $"{player_stats_SO.tempStats.moveRotationQuaternion.eulerAngles.z:F2})";
         current_target_speed_TMP.text   = $"target speed | {player_stats_SO.tempStats.curTargetSpeed:F2}";
         is_grounded_TMP.text            = $"grounded | {player_stats_SO.tempStats.isGrounded}";
         wish_jump_TMP.text              = $"wish jump | {player_stats_SO.tempStats.willJump}";

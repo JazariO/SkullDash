@@ -5,7 +5,8 @@ public class InputDataSO : ScriptableObject
 {
     public Vector2 moveInput;
     public Vector2 lookInput;
-    public bool crouchInput;
+    public bool crouchHoldInput;
+    public bool crouchPressedInput;
     public bool sprintInput;
     public bool jumpHoldInput;
     public bool jumpPressedInput;

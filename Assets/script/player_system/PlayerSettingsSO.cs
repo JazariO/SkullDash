@@ -19,10 +19,31 @@ public class PlayerSettingsSO : ScriptableObject
     public float airAcceleration = 0.1f;
 
     [Tooltip("Initial upward velocity applied when jumping")]
-    public float jumpSpeed = 6;
+    public float jumpForce = 6;
 
     [Tooltip("Time window (in seconds) after pressing jump where the jump will still trigger before landing")]
     public float jumpBufferTime = 0.2f;
+
+    [Tooltip("Time window (in seconds) after pressing slide where the slide will still trigger before landing")]
+    public float slideBufferTime = 0.1f;
+
+    [Tooltip("The height of the collider when sliding")]
+    public float slideHeight = 1f;
+
+    [Tooltip("The height of the collider when standing")]
+    public float standingHeight = 2f;
+
+    [Tooltip("Movement speed when sliding")]
+    public float slideSpeed = 6;
+
+    [Tooltip("How long it take to slow down when sliding")]
+    public float slideAccelation = 1;
+
+    [Tooltip("Movement speed when crouching")]
+    public float crouchSpeed = 0.1f;
+
+    [Tooltip("Minimum speed to still be sliding")]
+    public float minimumSlideSpeed = 0.01f;
 
     [Tooltip("Time window (in seconds) while falling where the jump will still trigger")]
     public float coyoteTime = 0.3f;
@@ -44,28 +65,34 @@ public class PlayerSettingsSO : ScriptableObject
     [Tooltip("Maximum downward velocity the player can reach while falling")]
     public float maxFallSpeed = 10;
 
-    [Range(0, 1)]
-    [Tooltip("Multiplier applied to gravity near the jump apex (lower values create a floatier jump)")]
-    public float antiGravMultiplier = 0.5f;
-
-    [Tooltip("Vertical speed threshold around the jump apex where reduced gravity is applied")]
-    public float antiGravApexThreshold = 1;
-
-    [Range(1, 3)]
-    [Tooltip("What the gravity increases to on the frames where the velocity is increasing but the jump has cancelled")]
-    public float earlyFallGravMultiplier = 3;
-
-    [Range(1, 3)]
-    [Tooltip("What the gravity increases to when falling")]
+    [Range(1, 5)]
+    [Tooltip("How rapidly the players falls speed increases")]
     public float fallGravMultiplier = 1.5f;
 
 
-    //GROUND CHECK SETTINGS
-    [Header("Ground Check Settings")]
+    //COLLISION CHECK SETTINGS
+    [Header("Collision Check Settings")]
 
     [Tooltip("Radius of the sphere used to detect the ground")]
     public float groundCheckRadius = 0.9f;
 
     [Tooltip("Distance below the player to check for ground contact")]
-    public float groundCheckDistance = 0.25f;
+    public float groundCheckOrigin = 0.25f;
+
+    [Tooltip("Distance of the ground check")]
+    public float groundCheckDistance = 1;
+
+    [Tooltip("Maximum step height")]
+    public float stepThreshold = 0.3f;
+
+    [Tooltip("Distance of the wall check")]
+    public float wallCheckDistance = 0.5f;
+
+    [Range(1, 5)]
+    [Tooltip("The speed it takes to correct the distance from the ground")]
+    public float correctionSpeed = 2;
+
+    [Range(0, 90)]
+    [Tooltip("The maximum angle in degrees the player can climb")]
+    public float slopeAngleThreshold = 45;
 }

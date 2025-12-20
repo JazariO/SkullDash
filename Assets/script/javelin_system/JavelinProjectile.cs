@@ -39,7 +39,7 @@ public class JavelinProjectile : MonoBehaviour
             force_queued = false;
         }
 
-        if(rb.linearVelocity.sqrMagnitude != 0.0f)
+        if(rb.linearVelocity.sqrMagnitude > 0.01f)
         {
             transform.rotation = Quaternion.LookRotation(rb.linearVelocity, Vector3.up);
         }
@@ -73,8 +73,6 @@ public class JavelinProjectile : MonoBehaviour
                 }
             }
 
-            Debug.Log("Closest Index");
-
             if(closest_contact_index != -1)
             {
                 rb.useGravity = false;
@@ -86,7 +84,7 @@ public class JavelinProjectile : MonoBehaviour
                 if(Vector3.Dot(to_contact, transform.forward) > 0f)
                 {
                     //embed javelin
-                    transform.position = contact_point - transform.forward * 0.1f; // snap to contact
+                    transform.position = contact_point - transform.forward; // snap to contact
 
                     transform.position += transform.forward * 0.05f;
                 }

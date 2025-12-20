@@ -45,7 +45,7 @@ public class InputManager : MonoBehaviour, ISaveableSettings
 
         input_data_SO.moveInput = Vector2.zero;
         input_data_SO.lookInput = Vector2.zero;
-        input_data_SO.crouchInput = false;
+        input_data_SO.crouchPressedInput = false;
         input_data_SO.sprintInput = false;
         input_data_SO.jumpHoldInput = false;
         input_data_SO.interactInput = false;
@@ -124,7 +124,7 @@ public class InputManager : MonoBehaviour, ISaveableSettings
     private void Update()
     {
         input_data_SO.moveInput = _moveAction.ReadValue<Vector2>();
-        input_data_SO.crouchInput = _crouchAction.ReadValue<float>() > 0;
+        input_data_SO.crouchHoldInput = _crouchAction.ReadValue<float>() > 0;
         input_data_SO.sprintInput = _sprintAction.ReadValue<float>() > 0;
         input_data_SO.jumpHoldInput = _jumpAction.ReadValue<float>() > 0;
         input_data_SO.lookInput = _lookAction.ReadValue<Vector2>();
@@ -147,6 +147,7 @@ public class InputManager : MonoBehaviour, ISaveableSettings
         }
 
         input_data_SO.jumpPressedInput = _jumpAction.WasPressedThisFrame();
+        input_data_SO.crouchPressedInput = _crouchAction.WasPressedThisFrame();
     }
 
     public void OnPlayGameEventRaised()
