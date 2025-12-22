@@ -54,7 +54,6 @@ public class PlayerBrain : MonoBehaviour
         stats.tempStats.targetCamPivotPos = stats.cacheStats.startCamPivotPosition;
         colliders = new Collider[settings.maxCollisionCount];
     }
-
     private void Start()
     {
         stats.tempStats.hitPoints = new Vector3[stats.cacheStats.checkOffets.Length];
@@ -359,14 +358,15 @@ public class PlayerBrain : MonoBehaviour
                         float massRatio = hitBody.mass / (settings.mass + hitBody.mass);
                         stats.tempStats.moveVelocity += relativeVelocity * massRatio;
                     }
-
                 }
             }
             if (accumWallVectors != Vector3.zero)
             {
-                Vector3 pushVelocity = accumWallVectors / Time.fixedDeltaTime;
-                stats.tempStats.targetVelocity += pushVelocity;
-                transform.position += accumWallVectors;
+                Vector3 wallNormal = accumWallVectors.normalized;
+                stats.tempStats.wallNormal = wallNormal;
+
+                stats.tempStats.moveVelocity -= Vector3.Project(stats.tempStats.moveVelocity, wallNormal);
+                stats.tempStats.targetVelocity -= Vector3.Project(stats.tempStats.targetVelocity, wallNormal);
             }
         }
 
