@@ -54,7 +54,6 @@ public class PlayerBrain : MonoBehaviour
         stats.tempStats.targetCamPivotPos = stats.cacheStats.startCamPivotPosition;
         colliders = new Collider[settings.maxCollisionCount];
     }
-
     private void Start()
     {
         stats.tempStats.hitPoints = new Vector3[stats.cacheStats.checkOffets.Length];
@@ -330,10 +329,6 @@ public class PlayerBrain : MonoBehaviour
         stats.tempStats.slopeMultiplier = inAirState ? 1 : 1 + slopeDot * stats.tempStats.slope; // slope becomes a multiplier with 1 being the flat surface. less than one the slope is uphill, more than 1 the slope is downhill
         stats.tempStats.targetVelocity = (stats.tempStats.moveDirection * stats.tempStats.curTargetSpeed * stats.tempStats.slopeMultiplier) + stats.tempStats.correctionVelocity;
 
-        //Calculate non collision velocity
-        float accel = accellation * Time.fixedDeltaTime;
-        stats.tempStats.moveVelocity.x = Mathf.Lerp(stats.tempStats.moveVelocity.x, stats.tempStats.targetVelocity.x, accel);
-        stats.tempStats.moveVelocity.z = Mathf.Lerp(stats.tempStats.moveVelocity.z, stats.tempStats.targetVelocity.z, accel);
 
         //Manually Handle Collisions
         Vector3 distance = stats.tempStats.moveVelocity * Time.fixedDeltaTime;
@@ -343,29 +338,42 @@ public class PlayerBrain : MonoBehaviour
         Vector3 top = center + Vector3.up * halfHeight;
         Vector3 bottom = center - Vector3.up * halfHeight;
 
+
         stats.tempStats.wallNormal = Vector3.zero;
         int collisionCount = Physics.OverlapCapsuleNonAlloc(top, bottom, capsuleCollider.radius, colliders, layerData.ground, QueryTriggerInteraction.Ignore);
         if (collisionCount > 0)
         {
             Vector3 accumWallVectors = Vector3.zero;
+
             for (int i = 0; i < collisionCount; i++)
             {
                 Collider col = colliders[i];
                 if (Physics.ComputePenetration(capsuleCollider, transform.position, transform.rotation, col, col.transform.position, col.transform.rotation, out Vector3 dir, out float dist))
                 {
                     accumWallVectors += dir * dist;
+                    Rigidbody hitBody = col.attachedRigidbody;
+                    if (hitBody != null && !hitBody.isKinematic)
+                    {
+                        Vector3 relativeVelocity = Vector3.Project(hitBody.linearVelocity, dir);
+                        float massRatio = hitBody.mass / (settings.mass + hitBody.mass);
+                        stats.tempStats.moveVelocity += relativeVelocity * massRatio;
+                    }
                 }
             }
-
             if (accumWallVectors != Vector3.zero)
             {
                 Vector3 wallNormal = accumWallVectors.normalized;
-                if (Vector3.Dot(stats.tempStats.moveVelocity, wallNormal) <= 0f)
-                {
-                    stats.tempStats.moveVelocity = Vector3.ProjectOnPlane(stats.tempStats.moveVelocity, wallNormal);
-                }
+                stats.tempStats.wallNormal = wallNormal;
+
+                stats.tempStats.moveVelocity -= Vector3.Project(stats.tempStats.moveVelocity, wallNormal);
+                stats.tempStats.targetVelocity -= Vector3.Project(stats.tempStats.targetVelocity, wallNormal);
             }
         }
+
+        //Calculate non collision velocity
+        float accel = accellation * Time.fixedDeltaTime;
+        stats.tempStats.moveVelocity.x = Mathf.Lerp(stats.tempStats.moveVelocity.x, stats.tempStats.targetVelocity.x, accel);
+        stats.tempStats.moveVelocity.z = Mathf.Lerp(stats.tempStats.moveVelocity.z, stats.tempStats.targetVelocity.z, accel);
         stats.tempStats.speed = stats.tempStats.moveVelocity.magnitude;
         
         if (stats.tempStats.moveVelocity != Vector3.zero) DebugDraw.WireArrow(capsuleCollider.bounds.center, capsuleCollider.bounds.center + stats.tempStats.moveVelocity, Vector3.up, color: Color.red, fromFixedUpdate: true);
