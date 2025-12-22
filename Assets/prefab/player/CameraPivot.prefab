@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 7639542723700065548}
   - component: {fileID: 8134990562532089799}
   m_Layer: 6
-  m_Name: Camera
+  m_Name: CameraPivot
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
