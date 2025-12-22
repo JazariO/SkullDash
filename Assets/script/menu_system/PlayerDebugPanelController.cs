@@ -33,7 +33,7 @@ public class PlayerDebugPanelController : MonoBehaviour
         is_grounded_TMP.text            = $"grounded | {player_stats_SO.tempStats.isGrounded}";
         wish_jump_TMP.text              = $"wish jump | {player_stats_SO.tempStats.willJump}";
         last_jump_time_TMP.text         = $"last jump time | {player_stats_SO.tempStats.lastJumpTime:F2}";
-        look_dir_TMP.text               = $"look dir | Pitch:{player_stats_SO.tempStats.curPitch:F2}, Yaw:{player_stats_SO.tempStats.curYaw:F2}";
+        look_dir_TMP.text               = $"look dir | Pitch:{player_stats_SO.tempStats.curYaw:F2}, Yaw:{player_stats_SO.tempStats.curPitch:F2}";
         slope_TMP.text                  = $"slope | {player_stats_SO.tempStats.slope:F2}";
         current_state_TMP.text          = $"state | {player_stats_SO.tempStats.curState}";
 

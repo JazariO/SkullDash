@@ -26,8 +26,7 @@ public class PlayerBrain : MonoBehaviour
     [Header("Components")]
     [SerializeField] Rigidbody rigidBody;
     [SerializeField] CapsuleCollider capsuleCollider;
-    [SerializeField] Camera cam;
-
+    [SerializeField] Transform camPivot;
     private void OnValidate()
     {
         stats.tempStats.bottomCapsuleCenter = new Vector3(capsuleCollider.bounds.center.x, capsuleCollider.bounds.min.y + settings.groundCheckOrigin, capsuleCollider.bounds.center.z);
@@ -36,12 +35,13 @@ public class PlayerBrain : MonoBehaviour
     {
         stats.tempStats.lastJumpTime = -settings.jumpBufferTime;
         stats.tempStats.lastSlideTime = -settings.slideBufferTime;
-        stats.tempStats.curYaw = transform.eulerAngles.y;
+        stats.tempStats.curPitch = transform.eulerAngles.y;
         stats.tempStats.moveRotationQuaternion = Quaternion.identity;
+        stats.tempStats.curGroundCheckThreshold = settings.standingGroundThreshold;
 
         float groundCheckOffset = capsuleCollider.radius * settings.groundCheckRadius;
 
-        stats.cacheStats.groundCheckOffsets = new Vector3[]
+        stats.cacheStats.checkOffets = new Vector3[]
         {
             Vector3.zero,
             new Vector3(groundCheckOffset, 0, 0),
@@ -49,7 +49,7 @@ public class PlayerBrain : MonoBehaviour
             new Vector3(0, 0, groundCheckOffset),
             new Vector3(0, 0, -groundCheckOffset)
         };
-        stats.tempStats.hitPoints = new Vector3[stats.cacheStats.groundCheckOffsets.Length];
+        stats.tempStats.hitPoints = new Vector3[stats.cacheStats.checkOffets.Length];
     }
     private void Update()
     {
@@ -65,6 +65,7 @@ public class PlayerBrain : MonoBehaviour
         FixedUpdateState();
         FixedUpdateRotate();
         GetGroundData();
+        GetCeilingData();
 
     }
     private void OnDisable()
@@ -90,7 +91,7 @@ public class PlayerBrain : MonoBehaviour
         {
             SetState(State.Slide);
         }
-        else if (inputs.crouchHoldInput)
+        else if (inputs.crouchHoldInput || stats.tempStats.hitCeiling)
         {
             SetState(State.Crouch);
         }
@@ -120,21 +121,25 @@ public class PlayerBrain : MonoBehaviour
         {
             case State.Idle:
             {
+                stats.tempStats.curGroundCheckThreshold = settings.standingGroundThreshold;
 
             }
             break;
             case State.Walk:
             {
+                stats.tempStats.curGroundCheckThreshold = settings.standingGroundThreshold;
                 stats.tempStats.curTargetSpeed = settings.walkSpeed;
             }
             break;
             case State.Run:
             {
+                stats.tempStats.curGroundCheckThreshold = settings.standingGroundThreshold;
                 stats.tempStats.curTargetSpeed = settings.runSpeed;
             }
             break;
             case State.Jump:
             {
+                stats.tempStats.curGroundCheckThreshold = settings.standingGroundThreshold;
                 stats.tempStats.moveVelocity.y = settings.jumpForce;
                 stats.tempStats.coyoteTimeElapsed = settings.coyoteTime;
                 stats.tempStats.correctionVelocity = Vector3.zero;
@@ -143,6 +148,7 @@ public class PlayerBrain : MonoBehaviour
             break;
             case State.Fall:
             {
+                stats.tempStats.curGroundCheckThreshold = settings.standingGroundThreshold;
             }
             break;
             case State.Slide:
@@ -151,9 +157,9 @@ public class PlayerBrain : MonoBehaviour
                 capsuleCollider.height = trueHeight;
                 float yOffset = Mathf.Min(trueHeight * 0.5f - 1, capsuleCollider.radius * 2);
                 capsuleCollider.center = new Vector3(capsuleCollider.center.x, yOffset, capsuleCollider.center.z);
-                cam.transform.localPosition = new Vector3(0, yOffset * 2, 0);
+                stats.tempStats.camTargetPos = new Vector3(0, yOffset * 2, 0);
 
-
+                stats.tempStats.curGroundCheckThreshold = settings.crouchGroundThreshold;
                 stats.tempStats.moveVelocity = settings.slideSpeed * stats.tempStats.moveDirection;
                 stats.tempStats.curTargetSpeed = 0;
             }
@@ -163,8 +169,10 @@ public class PlayerBrain : MonoBehaviour
                 float trueHeight = Mathf.Max(settings.slideHeight, capsuleCollider.radius * 2);
                 capsuleCollider.height = trueHeight;
                 float yOffset = Mathf.Min(trueHeight * 0.5f - 1, capsuleCollider.radius * 2);
+
+                stats.tempStats.curGroundCheckThreshold = settings.crouchGroundThreshold;
                 capsuleCollider.center = new Vector3(capsuleCollider.center.x, yOffset, capsuleCollider.center.z);
-                cam.transform.localPosition = new Vector3(0, yOffset * 2, 0);
+                stats.tempStats.camTargetPos = new Vector3(0, yOffset * 2, 0);
 
                 stats.tempStats.curTargetSpeed = settings.crouchSpeed;
             }
@@ -299,14 +307,14 @@ public class PlayerBrain : MonoBehaviour
             {
                 capsuleCollider.height = settings.standingHeight;
                 capsuleCollider.center = Vector3.zero;
-                cam.transform.localPosition = Vector3.zero;
+                stats.tempStats.camTargetPos = Vector3.zero;
             }
             break;
             case State.Crouch:
             {
                 capsuleCollider.height = settings.standingHeight;
                 capsuleCollider.center = Vector3.zero;
-                cam.transform.localPosition = Vector3.zero;
+                stats.tempStats.camTargetPos = Vector3.zero;
             }
             break;
         }
@@ -317,13 +325,13 @@ public class PlayerBrain : MonoBehaviour
     }
     private void UpdateRotation()
     {
-        float yaw = inputs.lookInput.x * userSettings.sensitivity;
-        stats.tempStats.curYaw += yaw;
-        stats.tempStats.moveRotationQuaternion = Quaternion.Euler(0.0f, stats.tempStats.curYaw, 0.0f);
-        float pitch = inputs.lookInput.y * userSettings.sensitivity;
-        stats.tempStats.curPitch -= pitch;
-        stats.tempStats.curPitch = Mathf.Clamp(stats.tempStats.curPitch, -settings.clampedPitch, settings.clampedPitch);
-        cam.transform.localRotation = Quaternion.Euler(stats.tempStats.curPitch, 0, 0);
+        float pitch = inputs.lookInput.x * userSettings.sensitivity;
+        stats.tempStats.curPitch += pitch;
+        stats.tempStats.moveRotationQuaternion = Quaternion.Euler(0.0f, stats.tempStats.curPitch, 0.0f);
+        float yaw = inputs.lookInput.y * userSettings.sensitivity;
+        stats.tempStats.curYaw -= yaw;
+        stats.tempStats.curYaw = Mathf.Clamp(stats.tempStats.curYaw, -settings.clampedyaw, settings.clampedyaw);
+        camPivot.localRotation = Quaternion.Euler(stats.tempStats.curYaw, 0, 0);
     }
     private void HorizontalVelocity(float accellation, Vector3 groundNormal)
     {
@@ -355,7 +363,7 @@ public class PlayerBrain : MonoBehaviour
     }
     private void GroundedVerticalVelocity(float accellation)
     {
-        float targetDistanceMargin = settings.groundThreshold - Vector3.Distance(stats.tempStats.bottomCapsuleCenter, stats.tempStats.groundPlaneCentroid);
+        float targetDistanceMargin = settings.standingGroundThreshold - Vector3.Distance(stats.tempStats.bottomCapsuleCenter, stats.tempStats.groundPlaneCentroid);
 
         if (Mathf.Abs(targetDistanceMargin) < settings.groundThresholdBuffer)
         {
@@ -373,9 +381,9 @@ public class PlayerBrain : MonoBehaviour
         int hitCount = 0;
         stats.tempStats.bottomCapsuleCenter = new Vector3(capsuleCollider.bounds.center.x, capsuleCollider.bounds.min.y + settings.groundCheckOrigin, capsuleCollider.bounds.center.z);
 
-        for (int i = 0; i < stats.cacheStats.groundCheckOffsets.Length; i++)
+        for (int i = 0; i < stats.cacheStats.checkOffets.Length; i++)
         {
-            if (Physics.Raycast(stats.tempStats.bottomCapsuleCenter + stats.cacheStats.groundCheckOffsets[i], Vector3.down, out RaycastHit groundNormalHit, settings.groundPlaneCheckDistance, layerData.ground))
+            if (Physics.Raycast(stats.tempStats.bottomCapsuleCenter + stats.cacheStats.checkOffets[i], Vector3.down, out RaycastHit groundNormalHit, settings.groundPlaneCheckDistance, layerData.ground))
             {
                 pointSum += groundNormalHit.point;
                 stats.tempStats.hitPoints[hitCount] = groundNormalHit.point;
@@ -411,14 +419,14 @@ public class PlayerBrain : MonoBehaviour
                 stats.tempStats.groundNormal = stats.tempStats.hitPoints[0].normalized;
             }
         }
-        for (int i = 0; i < stats.cacheStats.groundCheckOffsets.Length; i++)
+        for (int i = 0; i < stats.cacheStats.checkOffets.Length; i++)
         {
-            if (Physics.Raycast(stats.tempStats.bottomCapsuleCenter + stats.cacheStats.groundCheckOffsets[i], -stats.tempStats.groundNormal, out RaycastHit groundCheckHit, settings.groundThreshold, layerData.ground))
+            if (Physics.Raycast(stats.tempStats.bottomCapsuleCenter + stats.cacheStats.checkOffets[i], -stats.tempStats.groundNormal, out RaycastHit groundCheckHit, stats.tempStats.curGroundCheckThreshold, layerData.ground))
             {
                 stats.tempStats.isGrounded = true;
                 break;
             }
-            else if (i == stats.cacheStats.groundCheckOffsets.Length - 1)
+            else if (i == stats.cacheStats.checkOffets.Length - 1)
             {
                 stats.tempStats.isGrounded = false;
             }
@@ -428,13 +436,30 @@ public class PlayerBrain : MonoBehaviour
         Vector3 curGroundNormal = inAirState ? stats.tempStats.jumpGroundNormal : stats.tempStats.groundNormal;
         DebugDraw.WireQuad(stats.tempStats.groundPlaneCentroid, Quaternion.FromToRotation(Vector3.forward, curGroundNormal), Vector3.one, color: inAirState ? Color.green : Color.red, fromFixedUpdate: true);
     }
+    private void GetCeilingData()
+    {
+        Vector3 topCapsuleCenter = new Vector3(capsuleCollider.bounds.center.x, capsuleCollider.bounds.max.y - settings.ceilingCheckOrigin, capsuleCollider.bounds.center.z);
+
+        for (int i = 0; i < stats.cacheStats.checkOffets.Length; i++)
+        {
+            if (Physics.Raycast(topCapsuleCenter + stats.cacheStats.checkOffets[i], Vector3.up, out RaycastHit groundNormalHit, settings.ceilingCheckDistance, layerData.ground))
+            {
+                stats.tempStats.hitCeiling = true;
+                break;
+            }
+            else if (i == stats.cacheStats.checkOffets.Length - 1)
+            {
+                stats.tempStats.hitCeiling = false;
+            }
+        }
+    }
     private void OnDrawGizmosSelected()
     {
         if (capsuleCollider == null) return;
         stats.tempStats.bottomCapsuleCenter = new Vector3(capsuleCollider.bounds.center.x, capsuleCollider.bounds.min.y + settings.groundCheckOrigin, capsuleCollider.bounds.center.z);
-        for (int i = 0; i < stats.cacheStats.groundCheckOffsets.Length; i++)
+        for (int i = 0; i < stats.cacheStats.checkOffets.Length; i++)
         {
-            Vector3 start = stats.tempStats.bottomCapsuleCenter + stats.cacheStats.groundCheckOffsets[i];
+            Vector3 start = stats.tempStats.bottomCapsuleCenter + stats.cacheStats.checkOffets[i];
 
             bool hit = Physics.Raycast(start, Vector3.down, settings.groundPlaneCheckDistance, layerData.ground);
 
@@ -442,14 +467,15 @@ public class PlayerBrain : MonoBehaviour
             Gizmos.DrawLine(start, start + Vector3.down * settings.groundPlaneCheckDistance);
         }
 
-        for (int i = 0; i < stats.cacheStats.groundCheckOffsets.Length; i++)
+        float editorGroundThreshold = Application.isPlaying ? stats.tempStats.curGroundCheckThreshold : settings.standingGroundThreshold;
+        for (int i = 0; i < stats.cacheStats.checkOffets.Length; i++)
         {
-            Vector3 start = stats.tempStats.bottomCapsuleCenter + stats.cacheStats.groundCheckOffsets[i];
+            Vector3 start = stats.tempStats.bottomCapsuleCenter + stats.cacheStats.checkOffets[i];
 
-            bool hit = Physics.Raycast(start, -stats.tempStats.groundNormal, settings.groundThreshold, layerData.ground);
+            bool hit = Physics.Raycast(start, -stats.tempStats.groundNormal, editorGroundThreshold, layerData.ground);
 
             Gizmos.color = hit ? Color.cyan : Color.orange;
-            Gizmos.DrawLine(start, start - stats.tempStats.groundNormal * settings.groundThreshold);
+            Gizmos.DrawLine(start, start - stats.tempStats.groundNormal * editorGroundThreshold);
         }
     }
     private void OnDrawGizmos()

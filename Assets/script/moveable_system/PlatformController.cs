@@ -1,4 +1,3 @@
-using UnityEditor.Rendering;
 using UnityEngine;
 
 public class PlatformController : MonoBehaviour
@@ -112,7 +111,7 @@ public class PlatformController : MonoBehaviour
             // Orbit player around platform using yaw delta
             float platform_yaw_delta = Mathf.DeltaAngle(platform_data.last_platform_rotation.eulerAngles.y, rb_platform.rotation.eulerAngles.y );
             Quaternion platform_rotation_delta = Quaternion.AngleAxis(platform_yaw_delta, Vector3.up);
-            player_stats_SO.tempStats.curYaw += platform_yaw_delta;
+            player_stats_SO.tempStats.curPitch += platform_yaw_delta;
 
             // Movement
             Vector3 deltaPos = rb_platform.position - platform_data.last_platform_position;

@@ -27,14 +27,17 @@ MonoBehaviour:
   minimumSlideSpeed: 0.05
   coyoteTime: 0.1
   clampedPitch: 70
+  camAcceleration: 3
   gravity: 15
   maxFallSpeed: -30
   fallGravMultiplier: 3.76
   groundCheckRadius: 0.8
+  groundPlaneCheckDistance: 1
   groundCheckOrigin: 0.5
-  groundPlaneCheckDistance: 2.5
-  groundThreshold: 1.5
+  standingGroundThreshold: 1
+  crouchGroundThreshold: 0.1
   groundThresholdBuffer: 0.1
-  wallCheckDistance: 0.5
+  ceilingCheckDistance: 1
+  ceilingCheckOrigin: 0.5
   correctionSpeed: 5.98
   slopeAngleThreshold: 72.6

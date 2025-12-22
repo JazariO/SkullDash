@@ -53,7 +53,10 @@ public class PlayerSettingsSO : ScriptableObject
 
     [Range(0, 90)]
     [Tooltip("Maximum vertical camera rotation angle (up and down) in degrees")]
-    public float clampedPitch = 70;
+    public float clampedyaw = 70;
+
+    [Tooltip("How quickly the camera gets to the target position")]
+    public float camAcceleration = 3;
 
 
     //GRAVITY SETTINGS
@@ -76,19 +79,26 @@ public class PlayerSettingsSO : ScriptableObject
     [Tooltip("Radius of the sphere used to detect the ground")]
     public float groundCheckRadius = 0.9f;
 
-    [Tooltip("Distance below the player to check for ground contact")]
-    public float groundCheckOrigin = 0.25f;
-
     [Tooltip("Distance to check the ground plane normals")]
     public float groundPlaneCheckDistance = 1;
 
+    [Tooltip("Origin of the checks for ground contact")]
+    public float groundCheckOrigin = 0.25f;
+
     [Tooltip("Maximum height off the ground to still be considered grounded")]
-    public float groundThreshold = 0.3f;
+    public float standingGroundThreshold = 1f;
+
+    [Tooltip("Maximum height off the ground to still be considered grounded")]
+    public float crouchGroundThreshold = 0.3f;
 
     [Tooltip("The buffer that lifts the player collider off the ground")]
     public float groundThresholdBuffer = 0.2f;
-    [Tooltip("Distance of the wall check")]
-    public float wallCheckDistance = 0.5f;
+
+    [Tooltip("Distance to check the ceiling")]
+    public float ceilingCheckDistance = 1;
+
+    [Tooltip("Origin of the checks for ceiling contact")]
+    public float ceilingCheckOrigin = 0.5f;
 
     [Range(1, 10)]
     [Tooltip("The speed it takes to correct the distance from the ground")]
