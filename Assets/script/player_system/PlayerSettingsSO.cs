@@ -79,16 +79,18 @@ public class PlayerSettingsSO : ScriptableObject
     [Tooltip("Distance below the player to check for ground contact")]
     public float groundCheckOrigin = 0.25f;
 
-    [Tooltip("Distance of the ground check")]
-    public float groundCheckDistance = 1;
+    [Tooltip("Distance to check the ground plane normals")]
+    public float groundPlaneCheckDistance = 1;
 
-    [Tooltip("Maximum step height")]
-    public float stepThreshold = 0.3f;
+    [Tooltip("Maximum height off the ground to still be considered grounded")]
+    public float groundThreshold = 0.3f;
 
+    [Tooltip("The buffer that lifts the player collider off the ground")]
+    public float groundThresholdBuffer = 0.2f;
     [Tooltip("Distance of the wall check")]
     public float wallCheckDistance = 0.5f;
 
-    [Range(1, 5)]
+    [Range(1, 10)]
     [Tooltip("The speed it takes to correct the distance from the ground")]
     public float correctionSpeed = 2;
 
