@@ -360,7 +360,7 @@ public class PlayerBrain : MonoBehaviour
             if (accumWallVectors != Vector3.zero)
             {
                 Vector3 wallNormal = accumWallVectors.normalized;
-                if (Vector3.Dot(stats.tempStats.moveVelocity, wallNormal) < 0f)
+                if (Vector3.Dot(stats.tempStats.moveVelocity, wallNormal) <= 0f)
                 {
                     stats.tempStats.moveVelocity = Vector3.ProjectOnPlane(stats.tempStats.moveVelocity, wallNormal);
                 }

@@ -31,13 +31,14 @@ MonoBehaviour:
   gravity: 15
   maxFallSpeed: -30
   fallGravMultiplier: 3.76
+  maxCollisionCount: 8
   groundCheckRadius: 0.8
-  groundPlaneCheckDistance: 3
+  groundPlaneCheckDistance: 2
   groundCheckOrigin: 0.5
   standingGroundTheshold: 1.5
   crouchGroundThreshold: 0.75
-  groundThresholdBuffer: 0.4
+  groundThresholdBuffer: 0.2
   ceilingCheckDistance: 1
   ceilingCheckOrigin: 0.5
-  correctionSpeed: 10
-  slopeAngleThreshold: 46.1
+  correctionSpeed: 3.57
+  slopeAngleThreshold: 49.6
