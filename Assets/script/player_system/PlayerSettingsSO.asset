@@ -34,9 +34,9 @@ MonoBehaviour:
   groundCheckRadius: 0.8
   groundPlaneCheckDistance: 1
   groundCheckOrigin: 0.5
-  standingGroundThreshold: 1
-  crouchGroundThreshold: 0.1
-  groundThresholdBuffer: 0.1
+  standingGroundThreshold: 0.8
+  crouchGroundThreshold: 0.6
+  groundThresholdBuffer: 0.2
   ceilingCheckDistance: 1
   ceilingCheckOrigin: 0.5
   correctionSpeed: 5.98

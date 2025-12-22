@@ -14,24 +14,24 @@ public class PlayerStatsSO : ScriptableObject
         public Vector3 groundNormal;
         public Vector3 groundPlaneCentroid;
         public Vector3 targetVelocity;
-        public Vector3 bottomCapsuleCenter;
+        public Vector3 groundPlaneCheckOrigin;
         public Vector3 jumpGroundNormal;
         public Vector3 correctionVelocity;
-        public Vector3 camTargetPos;
-
+        public Vector3 targetCamPivotPos;
+        public Vector3 curCamPivotPos;
         public float curTargetSpeed;
         public float lastJumpTime;
         public float lastSlideTime;
         public float speed;
         public float coyoteTimeElapsed;
-        public float curYaw;
         public float curPitch;
+        public float curYaw;
         public float slope;
         public float curAccel;
         public float slopeDirection;
-        public float curCameraYOffset;
         public float curStepTheshold;
-        public float curGroundCheckThreshold;
+        public float curGroundOriginOffset;
+        public float targetGroundOriginOffset;
 
         public bool willJump;
         public bool willSlide;
@@ -47,6 +47,7 @@ public class PlayerStatsSO : ScriptableObject
     [Serializable] public struct CacheStats
     {
         public Vector3[] checkOffets;
+        public Vector3 startCamPivotPosition;
     }
     public CacheStats cacheStats;
 }

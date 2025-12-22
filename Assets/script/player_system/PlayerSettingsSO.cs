@@ -53,7 +53,7 @@ public class PlayerSettingsSO : ScriptableObject
 
     [Range(0, 90)]
     [Tooltip("Maximum vertical camera rotation angle (up and down) in degrees")]
-    public float clampedyaw = 70;
+    public float clampedpitch = 70;
 
     [Tooltip("How quickly the camera gets to the target position")]
     public float camAcceleration = 3;
@@ -86,10 +86,10 @@ public class PlayerSettingsSO : ScriptableObject
     public float groundCheckOrigin = 0.25f;
 
     [Tooltip("Maximum height off the ground to still be considered grounded")]
-    public float standingGroundThreshold = 1f;
+    public float groundTheshold = 1f;
 
     [Tooltip("Maximum height off the ground to still be considered grounded")]
-    public float crouchGroundThreshold = 0.3f;
+    public float crouchGroundOffset = 0.3f;
 
     [Tooltip("The buffer that lifts the player collider off the ground")]
     public float groundThresholdBuffer = 0.2f;

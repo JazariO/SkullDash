@@ -29,18 +29,19 @@ public class PlayerBrain : MonoBehaviour
     [SerializeField] Transform camPivot;
     private void OnValidate()
     {
-        stats.tempStats.bottomCapsuleCenter = new Vector3(capsuleCollider.bounds.center.x, capsuleCollider.bounds.min.y + settings.groundCheckOrigin, capsuleCollider.bounds.center.z);
+        stats.tempStats.groundPlaneCheckOrigin = new Vector3(capsuleCollider.bounds.center.x, capsuleCollider.bounds.min.y + settings.groundCheckOrigin, capsuleCollider.bounds.center.z);
     }
     private void Awake()
     {
         stats.tempStats.lastJumpTime = -settings.jumpBufferTime;
         stats.tempStats.lastSlideTime = -settings.slideBufferTime;
-        stats.tempStats.curPitch = transform.eulerAngles.y;
+        stats.tempStats.curYaw = transform.eulerAngles.y;
         stats.tempStats.moveRotationQuaternion = Quaternion.identity;
-        stats.tempStats.curGroundCheckThreshold = settings.standingGroundThreshold;
+        stats.tempStats.targetGroundOriginOffset = 0;
+        stats.tempStats.hitPoints = new Vector3[stats.cacheStats.checkOffets.Length];
+
 
         float groundCheckOffset = capsuleCollider.radius * settings.groundCheckRadius;
-
         stats.cacheStats.checkOffets = new Vector3[]
         {
             Vector3.zero,
@@ -49,18 +50,21 @@ public class PlayerBrain : MonoBehaviour
             new Vector3(0, 0, groundCheckOffset),
             new Vector3(0, 0, -groundCheckOffset)
         };
-        stats.tempStats.hitPoints = new Vector3[stats.cacheStats.checkOffets.Length];
+        stats.cacheStats.startCamPivotPosition = camPivot.localPosition;
+        stats.tempStats.targetCamPivotPos = stats.cacheStats.startCamPivotPosition;
     }
     private void Update()
     {
         ChooseState();
         UpdateState();
         UpdateRotation();
+        UpdateCameraPivot();
         stats.tempStats.willJump = Time.time - stats.tempStats.lastJumpTime < settings.jumpBufferTime && stats.tempStats.curState != State.Jump;
         stats.tempStats.willSlide = Time.time - stats.tempStats.lastSlideTime < settings.slideBufferTime && stats.tempStats.curState != State.Slide;
     }
     private void FixedUpdate()
     {
+        stats.tempStats.curGroundOriginOffset = Mathf.Lerp(stats.tempStats.curGroundOriginOffset, stats.tempStats.targetGroundOriginOffset, Time.fixedDeltaTime);
         rigidBody.linearVelocity = stats.tempStats.moveVelocity;
         FixedUpdateState();
         FixedUpdateRotate();
@@ -121,25 +125,21 @@ public class PlayerBrain : MonoBehaviour
         {
             case State.Idle:
             {
-                stats.tempStats.curGroundCheckThreshold = settings.standingGroundThreshold;
 
             }
             break;
             case State.Walk:
             {
-                stats.tempStats.curGroundCheckThreshold = settings.standingGroundThreshold;
                 stats.tempStats.curTargetSpeed = settings.walkSpeed;
             }
             break;
             case State.Run:
             {
-                stats.tempStats.curGroundCheckThreshold = settings.standingGroundThreshold;
                 stats.tempStats.curTargetSpeed = settings.runSpeed;
             }
             break;
             case State.Jump:
             {
-                stats.tempStats.curGroundCheckThreshold = settings.standingGroundThreshold;
                 stats.tempStats.moveVelocity.y = settings.jumpForce;
                 stats.tempStats.coyoteTimeElapsed = settings.coyoteTime;
                 stats.tempStats.correctionVelocity = Vector3.zero;
@@ -148,32 +148,18 @@ public class PlayerBrain : MonoBehaviour
             break;
             case State.Fall:
             {
-                stats.tempStats.curGroundCheckThreshold = settings.standingGroundThreshold;
             }
             break;
             case State.Slide:
             {
-                float trueHeight = Mathf.Max(settings.slideHeight, capsuleCollider.radius * 2);
-                capsuleCollider.height = trueHeight;
-                float yOffset = Mathf.Min(trueHeight * 0.5f - 1, capsuleCollider.radius * 2);
-                capsuleCollider.center = new Vector3(capsuleCollider.center.x, yOffset, capsuleCollider.center.z);
-                stats.tempStats.camTargetPos = new Vector3(0, yOffset * 2, 0);
-
-                stats.tempStats.curGroundCheckThreshold = settings.crouchGroundThreshold;
+                EnterCrouchState();
                 stats.tempStats.moveVelocity = settings.slideSpeed * stats.tempStats.moveDirection;
                 stats.tempStats.curTargetSpeed = 0;
             }
             break;
             case State.Crouch:
             {
-                float trueHeight = Mathf.Max(settings.slideHeight, capsuleCollider.radius * 2);
-                capsuleCollider.height = trueHeight;
-                float yOffset = Mathf.Min(trueHeight * 0.5f - 1, capsuleCollider.radius * 2);
-
-                stats.tempStats.curGroundCheckThreshold = settings.crouchGroundThreshold;
-                capsuleCollider.center = new Vector3(capsuleCollider.center.x, yOffset, capsuleCollider.center.z);
-                stats.tempStats.camTargetPos = new Vector3(0, yOffset * 2, 0);
-
+                EnterCrouchState();
                 stats.tempStats.curTargetSpeed = settings.crouchSpeed;
             }
             break;
@@ -305,16 +291,12 @@ public class PlayerBrain : MonoBehaviour
             break;
             case State.Slide:
             {
-                capsuleCollider.height = settings.standingHeight;
-                capsuleCollider.center = Vector3.zero;
-                stats.tempStats.camTargetPos = Vector3.zero;
+                ExitCrouchState();
             }
             break;
             case State.Crouch:
             {
-                capsuleCollider.height = settings.standingHeight;
-                capsuleCollider.center = Vector3.zero;
-                stats.tempStats.camTargetPos = Vector3.zero;
+                ExitCrouchState();
             }
             break;
         }
@@ -325,13 +307,13 @@ public class PlayerBrain : MonoBehaviour
     }
     private void UpdateRotation()
     {
-        float pitch = inputs.lookInput.x * userSettings.sensitivity;
-        stats.tempStats.curPitch += pitch;
-        stats.tempStats.moveRotationQuaternion = Quaternion.Euler(0.0f, stats.tempStats.curPitch, 0.0f);
-        float yaw = inputs.lookInput.y * userSettings.sensitivity;
-        stats.tempStats.curYaw -= yaw;
-        stats.tempStats.curYaw = Mathf.Clamp(stats.tempStats.curYaw, -settings.clampedyaw, settings.clampedyaw);
-        camPivot.localRotation = Quaternion.Euler(stats.tempStats.curYaw, 0, 0);
+        float yaw = inputs.lookInput.x * userSettings.sensitivity;
+        stats.tempStats.curYaw += yaw;
+        stats.tempStats.moveRotationQuaternion = Quaternion.Euler(0.0f, stats.tempStats.curYaw, 0.0f);
+        float pitch = inputs.lookInput.y * userSettings.sensitivity;
+        stats.tempStats.curPitch -= pitch;
+        stats.tempStats.curPitch = Mathf.Clamp(stats.tempStats.curPitch, -settings.clampedpitch, settings.clampedpitch);
+        camPivot.localRotation = Quaternion.Euler(stats.tempStats.curPitch, 0, 0);
     }
     private void HorizontalVelocity(float accellation, Vector3 groundNormal)
     {
@@ -363,15 +345,23 @@ public class PlayerBrain : MonoBehaviour
     }
     private void GroundedVerticalVelocity(float accellation)
     {
-        float targetDistanceMargin = settings.standingGroundThreshold - Vector3.Distance(stats.tempStats.bottomCapsuleCenter, stats.tempStats.groundPlaneCentroid);
+        float targetDistanceMargin = settings.groundTheshold - Vector3.Distance(stats.tempStats.groundPlaneCheckOrigin, stats.tempStats.groundPlaneCentroid);
 
         if (Mathf.Abs(targetDistanceMargin) < settings.groundThresholdBuffer)
         {
             stats.tempStats.correctionVelocity = Vector3.zero;
         }
-        else if (targetDistanceMargin > 0)
+        else
         {
-            stats.tempStats.correctionVelocity = stats.tempStats.groundNormal * targetDistanceMargin * settings.correctionSpeed;
+            Vector3 corVel = stats.tempStats.groundNormal * targetDistanceMargin * settings.correctionSpeed;
+            if (targetDistanceMargin > 0)
+            {
+                stats.tempStats.correctionVelocity = corVel;
+            }
+            else
+            {
+                stats.tempStats.correctionVelocity = -corVel;
+            }
         }
         stats.tempStats.moveVelocity.y = Mathf.Lerp(stats.tempStats.moveVelocity.y, stats.tempStats.targetVelocity.y, accellation * Time.fixedDeltaTime);
     }
@@ -379,11 +369,11 @@ public class PlayerBrain : MonoBehaviour
     {
         Vector3 pointSum = Vector3.zero;
         int hitCount = 0;
-        stats.tempStats.bottomCapsuleCenter = new Vector3(capsuleCollider.bounds.center.x, capsuleCollider.bounds.min.y + settings.groundCheckOrigin, capsuleCollider.bounds.center.z);
+        stats.tempStats.groundPlaneCheckOrigin = new Vector3(capsuleCollider.bounds.center.x, capsuleCollider.bounds.min.y + settings.groundCheckOrigin + stats.tempStats.curGroundOriginOffset, capsuleCollider.bounds.center.z);
 
         for (int i = 0; i < stats.cacheStats.checkOffets.Length; i++)
         {
-            if (Physics.Raycast(stats.tempStats.bottomCapsuleCenter + stats.cacheStats.checkOffets[i], Vector3.down, out RaycastHit groundNormalHit, settings.groundPlaneCheckDistance, layerData.ground))
+            if (Physics.Raycast(stats.tempStats.groundPlaneCheckOrigin + stats.cacheStats.checkOffets[i], Vector3.down, out RaycastHit groundNormalHit, settings.groundPlaneCheckDistance, layerData.ground))
             {
                 pointSum += groundNormalHit.point;
                 stats.tempStats.hitPoints[hitCount] = groundNormalHit.point;
@@ -421,7 +411,7 @@ public class PlayerBrain : MonoBehaviour
         }
         for (int i = 0; i < stats.cacheStats.checkOffets.Length; i++)
         {
-            if (Physics.Raycast(stats.tempStats.bottomCapsuleCenter + stats.cacheStats.checkOffets[i], -stats.tempStats.groundNormal, out RaycastHit groundCheckHit, stats.tempStats.curGroundCheckThreshold, layerData.ground))
+            if (Physics.Raycast(stats.tempStats.groundPlaneCheckOrigin + stats.cacheStats.checkOffets[i], -stats.tempStats.groundNormal, out RaycastHit groundCheckHit, settings.groundTheshold, layerData.ground))
             {
                 stats.tempStats.isGrounded = true;
                 break;
@@ -453,31 +443,50 @@ public class PlayerBrain : MonoBehaviour
             }
         }
     }
-
-    //private void UpdateCameraPivot()
+    private void EnterCrouchState()
+    {
+        float trueHeight = Mathf.Max(settings.slideHeight, capsuleCollider.radius * 2);
+        capsuleCollider.height = trueHeight;
+        float yOffset = Mathf.Min(trueHeight * 0.5f - 1, capsuleCollider.radius * 2);
+        capsuleCollider.center = new Vector3(capsuleCollider.center.x, yOffset, capsuleCollider.center.z);
+        stats.tempStats.targetCamPivotPos.y = yOffset;
+        stats.tempStats.targetGroundOriginOffset = settings.crouchGroundOffset;
+    }
+    private void ExitCrouchState()
+    {
+        capsuleCollider.height = settings.standingHeight;
+        capsuleCollider.center = new Vector3(capsuleCollider.center.x, 0, capsuleCollider.center.z);
+        stats.tempStats.targetCamPivotPos.y = stats.cacheStats.startCamPivotPosition.y;
+        stats.tempStats.targetGroundOriginOffset = 0;
+    }
+    private void UpdateCameraPivot()
+    {
+        stats.tempStats.curCamPivotPos = Vector3.Lerp(stats.tempStats.curCamPivotPos, stats.tempStats.targetCamPivotPos, settings.camAcceleration * Time.deltaTime);
+        camPivot.transform.localPosition = stats.tempStats.curCamPivotPos;
+    }
     private void OnDrawGizmosSelected()
     {
         if (capsuleCollider == null) return;
-        stats.tempStats.bottomCapsuleCenter = new Vector3(capsuleCollider.bounds.center.x, capsuleCollider.bounds.min.y + settings.groundCheckOrigin, capsuleCollider.bounds.center.z);
+        stats.tempStats.groundPlaneCheckOrigin = new Vector3(capsuleCollider.bounds.center.x, capsuleCollider.bounds.min.y + settings.groundCheckOrigin, capsuleCollider.bounds.center.z);
+        //for (int i = 0; i < stats.cacheStats.checkOffets.Length; i++)
+        //{
+        //    Vector3 start = stats.tempStats.groundPlaneCheckOrigin + stats.cacheStats.checkOffets[i];
+
+        //    bool hit = Physics.Raycast(start, Vector3.down, settings.groundPlaneCheckDistance, layerData.ground);
+
+        //    Gizmos.color = hit ? Color.green : Color.red;
+        //    Gizmos.DrawLine(start, start + Vector3.down * settings.groundPlaneCheckDistance);
+        //}
+        Vector3 groundCheckOrigin = stats.tempStats.groundPlaneCheckOrigin + new Vector3(0, stats.tempStats.curGroundOriginOffset, 0);
+        Vector3 editorGroundNormal = Application.isPlaying ? -stats.tempStats.groundNormal : Vector3.down;
         for (int i = 0; i < stats.cacheStats.checkOffets.Length; i++)
         {
-            Vector3 start = stats.tempStats.bottomCapsuleCenter + stats.cacheStats.checkOffets[i];
+            Vector3 start = groundCheckOrigin + stats.cacheStats.checkOffets[i];
 
-            bool hit = Physics.Raycast(start, Vector3.down, settings.groundPlaneCheckDistance, layerData.ground);
-
-            Gizmos.color = hit ? Color.green : Color.red;
-            Gizmos.DrawLine(start, start + Vector3.down * settings.groundPlaneCheckDistance);
-        }
-
-        float editorGroundThreshold = Application.isPlaying ? stats.tempStats.curGroundCheckThreshold : settings.standingGroundThreshold;
-        for (int i = 0; i < stats.cacheStats.checkOffets.Length; i++)
-        {
-            Vector3 start = stats.tempStats.bottomCapsuleCenter + stats.cacheStats.checkOffets[i];
-
-            bool hit = Physics.Raycast(start, -stats.tempStats.groundNormal, editorGroundThreshold, layerData.ground);
+            bool hit = Physics.Raycast(start, editorGroundNormal, settings.groundTheshold, layerData.ground);
 
             Gizmos.color = hit ? Color.cyan : Color.orange;
-            Gizmos.DrawLine(start, start - stats.tempStats.groundNormal * editorGroundThreshold);
+            Gizmos.DrawLine(start, start + editorGroundNormal * settings.groundTheshold);
         }
     }
     private void OnDrawGizmos()
