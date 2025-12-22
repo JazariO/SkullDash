@@ -27,7 +27,7 @@ public class PlayerMovementDebugger : MonoBehaviour
 
     private void Start()
     {
-        DebugData[] debug_data = new DebugData[data_size];
+        debug_data = new DebugData[data_size];
         
         // Initialize debug_data
         for(int i = 0; i < debug_data.Length; i++)
