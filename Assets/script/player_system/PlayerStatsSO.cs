@@ -30,8 +30,6 @@ public class PlayerStatsSO : ScriptableObject
         public float curAccel;
         public float slopeDirection;
         public float curStepTheshold;
-        public float curGroundOriginOffset;
-        public float targetGroundOriginOffset;
 
         public bool willJump;
         public bool willSlide;

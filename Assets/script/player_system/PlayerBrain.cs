@@ -37,7 +37,6 @@ public class PlayerBrain : MonoBehaviour
         stats.tempStats.lastSlideTime = -settings.slideBufferTime;
         stats.tempStats.curYaw = transform.eulerAngles.y;
         stats.tempStats.moveRotationQuaternion = Quaternion.identity;
-        stats.tempStats.targetGroundOriginOffset = 0;
         stats.tempStats.hitPoints = new Vector3[stats.cacheStats.checkOffets.Length];
 
 
@@ -64,7 +63,6 @@ public class PlayerBrain : MonoBehaviour
     }
     private void FixedUpdate()
     {
-        stats.tempStats.curGroundOriginOffset = Mathf.Lerp(stats.tempStats.curGroundOriginOffset, stats.tempStats.targetGroundOriginOffset, Time.fixedDeltaTime);
         rigidBody.linearVelocity = stats.tempStats.moveVelocity;
         FixedUpdateState();
         FixedUpdateRotate();
@@ -310,10 +308,6 @@ public class PlayerBrain : MonoBehaviour
         float yaw = inputs.lookInput.x * userSettings.sensitivity;
         stats.tempStats.curYaw += yaw;
         stats.tempStats.moveRotationQuaternion = Quaternion.Euler(0.0f, stats.tempStats.curYaw, 0.0f);
-        float pitch = inputs.lookInput.y * userSettings.sensitivity;
-        stats.tempStats.curPitch -= pitch;
-        stats.tempStats.curPitch = Mathf.Clamp(stats.tempStats.curPitch, -settings.clampedpitch, settings.clampedpitch);
-        camPivot.localRotation = Quaternion.Euler(stats.tempStats.curPitch, 0, 0);
     }
     private void HorizontalVelocity(float accellation, Vector3 groundNormal)
     {
@@ -369,7 +363,7 @@ public class PlayerBrain : MonoBehaviour
     {
         Vector3 pointSum = Vector3.zero;
         int hitCount = 0;
-        stats.tempStats.groundPlaneCheckOrigin = new Vector3(capsuleCollider.bounds.center.x, capsuleCollider.bounds.min.y + settings.groundCheckOrigin + stats.tempStats.curGroundOriginOffset, capsuleCollider.bounds.center.z);
+        stats.tempStats.groundPlaneCheckOrigin = new Vector3(capsuleCollider.bounds.center.x, capsuleCollider.bounds.min.y + settings.groundCheckOrigin, capsuleCollider.bounds.center.z);
 
         for (int i = 0; i < stats.cacheStats.checkOffets.Length; i++)
         {
@@ -450,14 +444,12 @@ public class PlayerBrain : MonoBehaviour
         float yOffset = Mathf.Min(trueHeight * 0.5f - 1, capsuleCollider.radius * 2);
         capsuleCollider.center = new Vector3(capsuleCollider.center.x, yOffset, capsuleCollider.center.z);
         stats.tempStats.targetCamPivotPos.y = yOffset;
-        stats.tempStats.targetGroundOriginOffset = settings.crouchGroundOffset;
     }
     private void ExitCrouchState()
     {
         capsuleCollider.height = settings.standingHeight;
         capsuleCollider.center = new Vector3(capsuleCollider.center.x, 0, capsuleCollider.center.z);
         stats.tempStats.targetCamPivotPos.y = stats.cacheStats.startCamPivotPosition.y;
-        stats.tempStats.targetGroundOriginOffset = 0;
     }
     private void UpdateCameraPivot()
     {
@@ -477,11 +469,10 @@ public class PlayerBrain : MonoBehaviour
         //    Gizmos.color = hit ? Color.green : Color.red;
         //    Gizmos.DrawLine(start, start + Vector3.down * settings.groundPlaneCheckDistance);
         //}
-        Vector3 groundCheckOrigin = stats.tempStats.groundPlaneCheckOrigin + new Vector3(0, stats.tempStats.curGroundOriginOffset, 0);
         Vector3 editorGroundNormal = Application.isPlaying ? -stats.tempStats.groundNormal : Vector3.down;
         for (int i = 0; i < stats.cacheStats.checkOffets.Length; i++)
         {
-            Vector3 start = groundCheckOrigin + stats.cacheStats.checkOffets[i];
+            Vector3 start = stats.tempStats.groundPlaneCheckOrigin + stats.cacheStats.checkOffets[i];
 
             bool hit = Physics.Raycast(start, editorGroundNormal, settings.groundTheshold, layerData.ground);
 

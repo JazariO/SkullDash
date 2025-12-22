@@ -53,7 +53,7 @@ public class PlayerSettingsSO : ScriptableObject
 
     [Range(0, 90)]
     [Tooltip("Maximum vertical camera rotation angle (up and down) in degrees")]
-    public float clampedpitch = 70;
+    public float clampedPitch = 70;
 
     [Tooltip("How quickly the camera gets to the target position")]
     public float camAcceleration = 3;
