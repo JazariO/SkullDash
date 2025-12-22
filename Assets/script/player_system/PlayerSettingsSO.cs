@@ -103,6 +103,9 @@ public class PlayerSettingsSO : ScriptableObject
     [Tooltip("Origin of the checks for ceiling contact")]
     public float ceilingCheckOrigin = 0.5f;
 
+    [Tooltip("Weight in KG")]
+    public float mass = 80;
+
     [Range(1, 10)]
     [Tooltip("The speed it takes to correct the distance from the ground")]
     public float correctionSpeed = 2;
