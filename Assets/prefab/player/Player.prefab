@@ -164,7 +164,7 @@ MonoBehaviour:
   userSettings: {fileID: 11400000, guid: f0d0d286c50ea724bbed48db70a0b4f9, type: 2}
   rigidBody: {fileID: 697316521878957903}
   capsuleCollider: {fileID: 8718416935759330110}
-  cam: {fileID: 2825151893307809474}
+  camPivot: {fileID: 1309566812310621064}
 --- !u!114 &4786943739759103707
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -270,11 +270,6 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: d23b3450b9dfbc24da795eb8fa811607, type: 3}
---- !u!20 &2825151893307809474 stripped
-Camera:
-  m_CorrespondingSourceObject: {fileID: 8733900479559546290, guid: d23b3450b9dfbc24da795eb8fa811607, type: 3}
-  m_PrefabInstance: {fileID: 6773968663421709168}
-  m_PrefabAsset: {fileID: 0}
 --- !u!4 &2865922522021698023 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 8774197083646587543, guid: d23b3450b9dfbc24da795eb8fa811607, type: 3}

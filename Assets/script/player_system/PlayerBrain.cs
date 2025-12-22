@@ -453,6 +453,8 @@ public class PlayerBrain : MonoBehaviour
             }
         }
     }
+
+    //private void UpdateCameraPivot()
     private void OnDrawGizmosSelected()
     {
         if (capsuleCollider == null) return;
