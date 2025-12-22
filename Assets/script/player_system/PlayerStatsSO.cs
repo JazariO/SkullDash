@@ -15,10 +15,11 @@ public class PlayerStatsSO : ScriptableObject
         public Vector3 groundPlaneCentroid;
         public Vector3 targetVelocity;
         public Vector3 groundPlaneCheckOrigin;
-        public Vector3 jumpGroundNormal;
         public Vector3 correctionVelocity;
         public Vector3 targetCamPivotPos;
         public Vector3 curCamPivotPos;
+        public Vector3 centerGroundNormal;
+
         public float curTargetSpeed;
         public float lastJumpTime;
         public float lastSlideTime;
@@ -30,6 +31,9 @@ public class PlayerStatsSO : ScriptableObject
         public float curAccel;
         public float slopeDirection;
         public float curStepTheshold;
+        public float curGroundThreshold;
+        public float targetGroundThreshold;
+        public float slopeMultiplier;
 
         public bool willJump;
         public bool willSlide;

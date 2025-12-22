@@ -86,10 +86,10 @@ public class PlayerSettingsSO : ScriptableObject
     public float groundCheckOrigin = 0.25f;
 
     [Tooltip("Maximum height off the ground to still be considered grounded")]
-    public float groundTheshold = 1f;
+    public float standingGroundTheshold = 1f;
 
-    [Tooltip("Maximum height off the ground to still be considered grounded")]
-    public float crouchGroundOffset = 0.3f;
+    [Tooltip("Maximum height off the ground while crouched to still be considered grounded")]
+    public float crouchGroundThreshold = 0.3f;
 
     [Tooltip("The buffer that lifts the player collider off the ground")]
     public float groundThresholdBuffer = 0.2f;
