@@ -75,8 +75,6 @@ public class PlayerBrain : MonoBehaviour
         FixedUpdateState();
         FixedUpdateRotate();
         GetGroundData();
-        //GetCeilingData();
-
     }
     private void OnDisable()
     {
@@ -221,44 +219,44 @@ public class PlayerBrain : MonoBehaviour
             case State.Idle:
             {
                 GroundedVerticalVelocity(settings.groundAcceleration);
-                HorizontalVelocity(settings.groundAcceleration, stats.tempStats.groundNormal, inAirState: false);
+                HorizontalVelocity(settings.groundAcceleration, inAirState: false);
             }
             break;
             case State.Walk:
             {
                 GroundedVerticalVelocity(settings.groundAcceleration);
-                HorizontalVelocity(settings.groundAcceleration, stats.tempStats.groundNormal, inAirState: false);
+                HorizontalVelocity(settings.groundAcceleration, inAirState: false);
             }
             break;
             case State.Run:
             {
                 GroundedVerticalVelocity(settings.groundAcceleration);
-                HorizontalVelocity(settings.groundAcceleration, stats.tempStats.groundNormal, inAirState: false);
+                HorizontalVelocity(settings.groundAcceleration,inAirState: false);
             }
             break;
             case State.Jump:
             {
                 AirborneVerticalVelocity();
-                HorizontalVelocity(settings.airAcceleration, Vector3.up, inAirState: true);
+                HorizontalVelocity(settings.airAcceleration, inAirState: true);
             }
             break;
             case State.Fall:
             {
                 float gravMultipler = stats.tempStats.moveVelocity.y > 0 ? settings.fallGravMultiplier : 1;
                 AirborneVerticalVelocity(gravMultipler);
-                HorizontalVelocity(settings.airAcceleration, Vector3.up, inAirState: true);
+                HorizontalVelocity(settings.airAcceleration, inAirState: true);
             }
             break;
             case State.Slide:
             {
                 GroundedVerticalVelocity(settings.slideAccelation);
-                HorizontalVelocity(settings.slideAccelation, stats.tempStats.groundNormal, inAirState: false);
+                HorizontalVelocity(settings.slideAccelation, inAirState: false);
             }
             break;
             case State.Crouch:
             {
                 GroundedVerticalVelocity(settings.groundAcceleration);
-                HorizontalVelocity(settings.groundAcceleration, stats.tempStats.groundNormal, inAirState: false);
+                HorizontalVelocity(settings.groundAcceleration, inAirState: false);
             }
             break;
 
@@ -316,23 +314,28 @@ public class PlayerBrain : MonoBehaviour
         stats.tempStats.curYaw += yaw;
         stats.tempStats.moveRotationQuaternion = Quaternion.Euler(0.0f, stats.tempStats.curYaw, 0.0f);
     }
-    private void HorizontalVelocity(float accellation, Vector3 groundNormal, bool inAirState)
+    private void HorizontalVelocity(float accellation, bool inAirState)
     {
-        Vector3 forward = Vector3.ProjectOnPlane(transform.forward, groundNormal).normalized;
-        Vector3 right = Vector3.ProjectOnPlane(transform.right, groundNormal).normalized;
+        //Move Direction
+        Vector3 dirGroundNormal = inAirState ? Vector3.up : stats.tempStats.groundNormal;
+        Vector3 forward = Vector3.ProjectOnPlane(transform.forward, dirGroundNormal).normalized;
+        Vector3 right = Vector3.ProjectOnPlane(transform.right, dirGroundNormal).normalized;
         stats.tempStats.moveDirection = forward * inputs.moveInput.y + right * inputs.moveInput.x;
 
-        Vector3 slopeDir = Vector3.ProjectOnPlane(Vector3.down, groundNormal).normalized;
-        stats.tempStats.slope = Vector3.Angle(groundNormal, Vector3.up) / settings.slopeAngleThreshold; // slope factor that finds the percentage of the ground angle compared to the angle threshold
+
+        //Handling Slopes
+        Vector3 slopeDir = Vector3.ProjectOnPlane(Vector3.down, stats.tempStats.groundNormal).normalized;
+        stats.tempStats.slope = Vector3.Angle(stats.tempStats.groundNormal, Vector3.up) / settings.slopeAngleThreshold; // slope factor that finds the percentage of the ground angle compared to the angle threshold
         float slopeDot = Vector3.Dot(stats.tempStats.moveDirection, slopeDir); // -1 to 1 value to determine the angle of the ground relative to the movement direction
         stats.tempStats.slopeMultiplier = inAirState ? 1 : 1 + slopeDot * stats.tempStats.slope; // slope becomes a multiplier with 1 being the flat surface. less than one the slope is uphill, more than 1 the slope is downhill
         stats.tempStats.targetVelocity = (stats.tempStats.moveDirection * stats.tempStats.curTargetSpeed * stats.tempStats.slopeMultiplier) + stats.tempStats.correctionVelocity;
 
-
+        //Calculate non collision velocity
         float accel = accellation * Time.fixedDeltaTime;
         stats.tempStats.moveVelocity.x = Mathf.Lerp(stats.tempStats.moveVelocity.x, stats.tempStats.targetVelocity.x, accel);
         stats.tempStats.moveVelocity.z = Mathf.Lerp(stats.tempStats.moveVelocity.z, stats.tempStats.targetVelocity.z, accel);
 
+        //Manually Handle Collisions
         Vector3 distance = stats.tempStats.moveVelocity * Time.fixedDeltaTime;
         Vector3 center = capsuleCollider.transform.TransformPoint(capsuleCollider.center) + distance;
         float height = Mathf.Max(capsuleCollider.height, capsuleCollider.radius * 2f);
@@ -345,7 +348,7 @@ public class PlayerBrain : MonoBehaviour
         if (collisionCount > 0)
         {
             Vector3 accumWallVectors = Vector3.zero;
-            for( int i = 0; i < collisionCount; i++ )
+            for (int i = 0; i < collisionCount; i++)
             {
                 Collider col = colliders[i];
                 if (Physics.ComputePenetration(capsuleCollider, transform.position, transform.rotation, col, col.transform.position, col.transform.rotation, out Vector3 dir, out float dist))
@@ -357,8 +360,6 @@ public class PlayerBrain : MonoBehaviour
             if (accumWallVectors != Vector3.zero)
             {
                 Vector3 wallNormal = accumWallVectors.normalized;
-
-                // ONLY remove velocity INTO the wall
                 if (Vector3.Dot(stats.tempStats.moveVelocity, wallNormal) < 0f)
                 {
                     stats.tempStats.moveVelocity = Vector3.ProjectOnPlane(stats.tempStats.moveVelocity, wallNormal);
@@ -386,7 +387,7 @@ public class PlayerBrain : MonoBehaviour
         }
         else
         {
-            stats.tempStats.correctionVelocity = Vector3.ProjectOnPlane(stats.tempStats.groundNormal * targetDistanceMargin * settings.correctionSpeed, Vector3.up);
+            stats.tempStats.correctionVelocity = stats.tempStats.groundNormal * targetDistanceMargin * settings.correctionSpeed;
         }
         stats.tempStats.moveVelocity.y = Mathf.Lerp(stats.tempStats.moveVelocity.y, stats.tempStats.targetVelocity.y, accellation * Time.fixedDeltaTime);
     }
@@ -406,7 +407,7 @@ public class PlayerBrain : MonoBehaviour
             }
         }
 
-        if (hitCount > 0)
+        if (hitCount > 0 && (stats.tempStats.moveDirection != Vector3.zero || stats.tempStats.groundNormal == Vector3.zero || stats.tempStats.slope > 1))
         {
             stats.tempStats.groundPlaneCentroid = Vector3.zero;
 
@@ -416,10 +417,10 @@ public class PlayerBrain : MonoBehaviour
             }
             stats.tempStats.groundPlaneCentroid /= hitCount;
 
-            Vector3 planeNormal = Vector3.zero;
 
             if (hitCount > 1)
             {
+                Vector3 planeNormal = Vector3.zero;
                 for (int i = 0; i < hitCount; i++)
                 {
                     Vector3 bitangent = stats.tempStats.hitPoints[i] - stats.tempStats.groundPlaneCentroid;
@@ -452,23 +453,6 @@ public class PlayerBrain : MonoBehaviour
         bool inAirState = stats.tempStats.curState == State.Jump || stats.tempStats.curState == State.Fall;
         Vector3 curGroundNormal = inAirState ? Vector3.up : stats.tempStats.groundNormal;
         DebugDraw.WireQuad(stats.tempStats.groundPlaneCentroid, Quaternion.FromToRotation(Vector3.forward, curGroundNormal), Vector3.one, color: inAirState ? Color.green : Color.red, fromFixedUpdate: true);
-    }
-    private void GetCeilingData()
-    {
-        Vector3 topCapsuleCenter = new Vector3(capsuleCollider.bounds.center.x, capsuleCollider.bounds.max.y - settings.ceilingCheckOrigin, capsuleCollider.bounds.center.z);
-
-        for (int i = 0; i < stats.cacheStats.checkOffets.Length; i++)
-        {
-            if (Physics.Raycast(topCapsuleCenter + stats.cacheStats.checkOffets[i], Vector3.up, out RaycastHit groundNormalHit, settings.ceilingCheckDistance, layerData.ground))
-            {
-                stats.tempStats.hitCeiling = true;
-                break;
-            }
-            else if (i == stats.cacheStats.checkOffets.Length - 1)
-            {
-                stats.tempStats.hitCeiling = false;
-            }
-        }
     }
     private void EnterCrouchState()
     {
