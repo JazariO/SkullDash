@@ -76,6 +76,9 @@ public class PlayerSettingsSO : ScriptableObject
     //COLLISION CHECK SETTINGS
     [Header("Collision Check Settings")]
 
+    [Tooltip("Maxmimum wall collisions per frame")]
+    public int maxCollisionCount = 8;
+
     [Tooltip("Radius of the sphere used to detect the ground")]
     public float groundCheckRadius = 0.9f;
 

@@ -25,9 +25,10 @@ public class PlayerBrain : MonoBehaviour
     [SerializeField] UserSettingsSO userSettings;
 
     [Header("Components")]
-    [SerializeField] Rigidbody rigidBody;
     [SerializeField] CapsuleCollider capsuleCollider;
     [SerializeField] Transform camPivot;
+
+    Collider[] colliders;
     private void OnValidate()
     {
         stats.tempStats.groundPlaneCheckOrigin = new Vector3(capsuleCollider.bounds.center.x, capsuleCollider.bounds.min.y + settings.groundCheckOrigin, capsuleCollider.bounds.center.z);
@@ -51,6 +52,7 @@ public class PlayerBrain : MonoBehaviour
         };
         stats.cacheStats.startCamPivotPosition = camPivot.localPosition;
         stats.tempStats.targetCamPivotPos = stats.cacheStats.startCamPivotPosition;
+        colliders = new Collider[settings.maxCollisionCount];
     }
 
     private void Start()
@@ -69,7 +71,7 @@ public class PlayerBrain : MonoBehaviour
     }
     private void FixedUpdate()
     {
-        rigidBody.linearVelocity = stats.tempStats.moveVelocity;
+        transform.position += stats.tempStats.moveVelocity * Time.fixedDeltaTime;
         FixedUpdateState();
         FixedUpdateRotate();
         GetGroundData();
@@ -306,7 +308,7 @@ public class PlayerBrain : MonoBehaviour
     }
     private void FixedUpdateRotate()
     {
-        rigidBody.MoveRotation(stats.tempStats.moveRotationQuaternion);
+        transform.rotation = stats.tempStats.moveRotationQuaternion;
     }
     private void UpdateRotation()
     {
@@ -331,11 +333,37 @@ public class PlayerBrain : MonoBehaviour
         stats.tempStats.moveVelocity.x = Mathf.Lerp(stats.tempStats.moveVelocity.x, stats.tempStats.targetVelocity.x, accel);
         stats.tempStats.moveVelocity.z = Mathf.Lerp(stats.tempStats.moveVelocity.z, stats.tempStats.targetVelocity.z, accel);
 
-        float distance = (stats.tempStats.moveVelocity.magnitude * Time.fixedDeltaTime) + capsuleCollider.radius;
-        Vector3 center = capsuleCollider.transform.TransformPoint(capsuleCollider.center);
-        if (Physics.Raycast(center, stats.tempStats.moveDirection, out RaycastHit wallHit, distance, layerData.ground))
+        Vector3 distance = stats.tempStats.moveVelocity * Time.fixedDeltaTime;
+        Vector3 center = capsuleCollider.transform.TransformPoint(capsuleCollider.center) + distance;
+        float height = Mathf.Max(capsuleCollider.height, capsuleCollider.radius * 2f);
+        float halfHeight = height * 0.5f - capsuleCollider.radius;
+        Vector3 top = center + Vector3.up * halfHeight;
+        Vector3 bottom = center - Vector3.up * halfHeight;
+
+        stats.tempStats.wallNormal = Vector3.zero;
+        int collisionCount = Physics.OverlapCapsuleNonAlloc(top, bottom, capsuleCollider.radius, colliders, layerData.ground, QueryTriggerInteraction.Ignore);
+        if (collisionCount > 0)
         {
-            stats.tempStats.moveVelocity = Vector3.ProjectOnPlane(stats.tempStats.moveVelocity, wallHit.normal);
+            Vector3 accumWallVectors = Vector3.zero;
+            for( int i = 0; i < collisionCount; i++ )
+            {
+                Collider col = colliders[i];
+                if (Physics.ComputePenetration(capsuleCollider, transform.position, transform.rotation, col, col.transform.position, col.transform.rotation, out Vector3 dir, out float dist))
+                {
+                    accumWallVectors += dir * dist;
+                }
+            }
+
+            if (accumWallVectors != Vector3.zero)
+            {
+                Vector3 wallNormal = accumWallVectors.normalized;
+
+                // ONLY remove velocity INTO the wall
+                if (Vector3.Dot(stats.tempStats.moveVelocity, wallNormal) < 0f)
+                {
+                    stats.tempStats.moveVelocity = Vector3.ProjectOnPlane(stats.tempStats.moveVelocity, wallNormal);
+                }
+            }
         }
         stats.tempStats.speed = stats.tempStats.moveVelocity.magnitude;
         
@@ -358,8 +386,7 @@ public class PlayerBrain : MonoBehaviour
         }
         else
         {
-            stats.tempStats.correctionVelocity = stats.tempStats.groundNormal * targetDistanceMargin * settings.correctionSpeed;
-            Debug.Log(stats.tempStats.correctionVelocity);
+            stats.tempStats.correctionVelocity = Vector3.ProjectOnPlane(stats.tempStats.groundNormal * targetDistanceMargin * settings.correctionSpeed, Vector3.up);
         }
         stats.tempStats.moveVelocity.y = Mathf.Lerp(stats.tempStats.moveVelocity.y, stats.tempStats.targetVelocity.y, accellation * Time.fixedDeltaTime);
     }
@@ -487,6 +514,17 @@ public class PlayerBrain : MonoBehaviour
             Gizmos.color = hit ? Color.cyan : Color.orange;
             Gizmos.DrawLine(start, start + editorGroundNormal * settings.standingGroundTheshold);
         }
+
+        Vector3 center = capsuleCollider.transform.TransformPoint(capsuleCollider.center);
+        Vector3 nextFramePosition = center + (stats.tempStats.moveVelocity * Time.fixedDeltaTime);
+        float height = Mathf.Max(capsuleCollider.height, capsuleCollider.radius * 2f);
+        float halfHeight = height * 0.5f - capsuleCollider.radius;
+        Vector3 point1 = new(nextFramePosition.x, nextFramePosition.y + halfHeight, nextFramePosition.z);
+        Vector3 point2 = new(nextFramePosition.x, nextFramePosition.y - halfHeight, nextFramePosition.z);
+
+        Gizmos.color = Color.aquamarine;
+        Gizmos.DrawWireSphere(point1, capsuleCollider.radius);
+        Gizmos.DrawWireSphere(point2, capsuleCollider.radius);
 
     }
     private void OnDrawGizmos()

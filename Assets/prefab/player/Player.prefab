@@ -12,9 +12,9 @@ GameObject:
   - component: {fileID: 1084791736456262767}
   - component: {fileID: 1277455877065007622}
   - component: {fileID: 8718416935759330110}
-  - component: {fileID: 697316521878957903}
   - component: {fileID: 1602587143551133622}
   - component: {fileID: 4786943739759103707}
+  - component: {fileID: 4533417345177011190}
   m_Layer: 6
   m_Name: Player
   m_TagString: Player
@@ -117,7 +117,43 @@ CapsuleCollider:
   m_Height: 2
   m_Direction: 1
   m_Center: {x: 0, y: 0, z: 0}
---- !u!54 &697316521878957903
+--- !u!114 &1602587143551133622
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3006247736153090160}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 621139867743cd145b3614c9bf981e82, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerBrain
+  gameEventData: {fileID: 11400000, guid: 2e27f7de7ec27a540ab75957d42699a1, type: 2}
+  settings: {fileID: 11400000, guid: 07b31df588051e04d836a2177b133ff4, type: 2}
+  stats: {fileID: 11400000, guid: de320b30045c170489d39e0ed866f86c, type: 2}
+  inputs: {fileID: 11400000, guid: f066dad57d679fc46bde5fd5b502ebc7, type: 2}
+  layerData: {fileID: 11400000, guid: cb692f30aebabeb4a892f3fb4d583881, type: 2}
+  userSettings: {fileID: 11400000, guid: f0d0d286c50ea724bbed48db70a0b4f9, type: 2}
+  capsuleCollider: {fileID: 8718416935759330110}
+  camPivot: {fileID: 1309566812310621064}
+--- !u!114 &4786943739759103707
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3006247736153090160}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bfbec1bcf62fe0746a7715d938b3ebea, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerMovementDebugger
+  player_stats_SO: {fileID: 11400000, guid: de320b30045c170489d39e0ed866f86c, type: 2}
+  debug_enabled: 1
+  data_size: 18
+  debug_max_tickrate: 10
+--- !u!54 &4533417345177011190
 Rigidbody:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -139,48 +175,11 @@ Rigidbody:
     m_Bits: 0
   m_ImplicitCom: 1
   m_ImplicitTensor: 1
-  m_UseGravity: 0
+  m_UseGravity: 1
   m_IsKinematic: 0
   m_Interpolate: 0
-  m_Constraints: 80
+  m_Constraints: 0
   m_CollisionDetection: 0
---- !u!114 &1602587143551133622
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3006247736153090160}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 621139867743cd145b3614c9bf981e82, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::PlayerBrain
-  gameEventData: {fileID: 11400000, guid: 2e27f7de7ec27a540ab75957d42699a1, type: 2}
-  settings: {fileID: 11400000, guid: 07b31df588051e04d836a2177b133ff4, type: 2}
-  stats: {fileID: 11400000, guid: de320b30045c170489d39e0ed866f86c, type: 2}
-  inputs: {fileID: 11400000, guid: f066dad57d679fc46bde5fd5b502ebc7, type: 2}
-  layerData: {fileID: 11400000, guid: cb692f30aebabeb4a892f3fb4d583881, type: 2}
-  userSettings: {fileID: 11400000, guid: f0d0d286c50ea724bbed48db70a0b4f9, type: 2}
-  rigidBody: {fileID: 697316521878957903}
-  capsuleCollider: {fileID: 8718416935759330110}
-  camPivot: {fileID: 1309566812310621064}
---- !u!114 &4786943739759103707
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3006247736153090160}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: bfbec1bcf62fe0746a7715d938b3ebea, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::PlayerMovementDebugger
-  player_stats_SO: {fileID: 11400000, guid: de320b30045c170489d39e0ed866f86c, type: 2}
-  debug_enabled: 1
-  data_size: 18
-  debug_max_tickrate: 10
 --- !u!1 &8507030332345504493
 GameObject:
   m_ObjectHideFlags: 0
