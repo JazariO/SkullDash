@@ -407,7 +407,7 @@ public class PlayerBrain : MonoBehaviour
             }
         }
 
-        if (hitCount > 0 && (stats.tempStats.moveDirection != Vector3.zero || stats.tempStats.groundNormal == Vector3.zero || stats.tempStats.slope > 1))
+        if (hitCount > 0)
         {
             stats.tempStats.groundPlaneCentroid = Vector3.zero;
 
