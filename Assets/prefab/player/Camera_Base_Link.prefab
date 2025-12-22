@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 1411211297146732432}
   - component: {fileID: 8103556545720406322}
   m_Layer: 6
-  m_Name: Camera
+  m_Name: Camera_End_Effector
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -52,8 +52,10 @@ MonoBehaviour:
   player_stats_SO: {fileID: 11400000, guid: de320b30045c170489d39e0ed866f86c, type: 2}
   input_data_SO: {fileID: 11400000, guid: f066dad57d679fc46bde5fd5b502ebc7, type: 2}
   user_settings_SO: {fileID: 11400000, guid: f0d0d286c50ea724bbed48db70a0b4f9, type: 2}
-  tilt_pivot: {fileID: 1988997568544945079}
-  camera_pivot: {fileID: 1195876071155097036}
+  pivot_camera_base_link: {fileID: 8774197083646587543}
+  pivot_camera_tilt_link: {fileID: 1988997568544945079}
+  pivot_camera_end_effector: {fileID: 1195876071155097036}
+  tilt_scalar: 0.5
 --- !u!20 &8944307730420331853
 Camera:
   m_ObjectHideFlags: 0
@@ -173,7 +175,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1988997568544945079}
   m_Layer: 6
-  m_Name: Tilt_Pivot
+  m_Name: Camera_Tilt_Link
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -205,7 +207,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8774197083646587543}
   m_Layer: 6
-  m_Name: CameraPivot
+  m_Name: Camera_Base_Link
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
