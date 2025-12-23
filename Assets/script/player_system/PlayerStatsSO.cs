@@ -16,6 +16,7 @@ public class PlayerStatsSO : ScriptableObject
         public Vector3 groundPlaneCentroid;
         public Vector3 targetVelocity;
         public Vector3 groundPlaneCheckOrigin;
+        public Vector3 ceilingCheckOrigin;
         public Vector3 correctionVelocity;
         public Vector3 targetCamPivotPos;
         public Vector3 curCamPivotPos;
@@ -35,7 +36,7 @@ public class PlayerStatsSO : ScriptableObject
         public float curGroundThreshold;
         public float targetGroundThreshold;
         public float slopeMultiplier;
-
+        public float standingHeight;
         public int mostUpHitIndex;
 
         public bool willJump;

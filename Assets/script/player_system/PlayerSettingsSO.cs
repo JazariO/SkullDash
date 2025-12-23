@@ -98,7 +98,7 @@ public class PlayerSettingsSO : ScriptableObject
     public float groundThresholdBuffer = 0.2f;
 
     [Tooltip("Distance to check the ceiling")]
-    public float ceilingCheckDistance = 1;
+    public float ceilingCheckRadius = 1;
 
     [Tooltip("Origin of the checks for ceiling contact")]
     public float ceilingCheckOrigin = 0.5f;

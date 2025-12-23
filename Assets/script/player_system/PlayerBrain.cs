@@ -40,6 +40,7 @@ public class PlayerBrain : MonoBehaviour
         stats.tempStats.curYaw = transform.eulerAngles.y;
         stats.tempStats.moveRotationQuaternion = Quaternion.identity;
         stats.tempStats.targetGroundThreshold = settings.standingGroundTheshold;
+        stats.tempStats.standingHeight = capsuleCollider.height;
 
         float groundCheckOffset = capsuleCollider.radius * settings.groundCheckRadius;
         stats.cacheStats.checkOffets = new Vector3[]
@@ -74,6 +75,7 @@ public class PlayerBrain : MonoBehaviour
         FixedUpdateState();
         FixedUpdateRotate();
         GetGroundData();
+        GetCeilingCheck();
     }
     private void OnDisable()
     {
@@ -335,7 +337,7 @@ public class PlayerBrain : MonoBehaviour
             Vector3 slopeVelocity = slopeDir * stats.tempStats.slope;
             stats.tempStats.targetVelocity += slopeVelocity;
         }
-        //stats.tempStats.targetVelocity = Vector3.ProjectOnPlane(stats.tempStats.targetVelocity, stats.tempStats.groundNormal);
+
         //Manually Handle Collisions
         Vector3 distance = stats.tempStats.moveVelocity * Time.fixedDeltaTime;
         Vector3 center = capsuleCollider.transform.TransformPoint(capsuleCollider.center) + distance;
@@ -369,7 +371,6 @@ public class PlayerBrain : MonoBehaviour
             if (accumWallVectors != Vector3.zero)
             {
                 stats.tempStats.wallNormal = Vector3.ProjectOnPlane(accumWallVectors, Vector3.up).normalized;
-                Debug.Log(Vector3.Angle(stats.tempStats.wallNormal, Vector3.up));
                 //stats.tempStats.moveVelocity -= Vector3.Project(stats.tempStats.moveVelocity, stats.tempStats.wallNormal);
                 stats.tempStats.targetVelocity -= Vector3.Project(stats.tempStats.targetVelocity, stats.tempStats.wallNormal);
                 transform.position += accumWallVectors;
@@ -387,10 +388,16 @@ public class PlayerBrain : MonoBehaviour
     }
     private void AirborneVerticalVelocity(float gravityMultiplier = 1)
     {
+        if (stats.tempStats.hitCeiling && stats.tempStats.moveVelocity.y > 0)
+        {
+            stats.tempStats.moveVelocity.y = 0;
+            return;
+        }
         float gravity = settings.gravity * Time.fixedDeltaTime * gravityMultiplier;
         stats.tempStats.moveVelocity.y -= gravity;
         stats.tempStats.moveVelocity.y = Mathf.Max(stats.tempStats.moveVelocity.y, settings.maxFallSpeed);
     }
+
     private void GroundedVerticalVelocity(float accellation)
     {
         float targetDistanceMargin = stats.tempStats.targetGroundThreshold - Vector3.Distance(stats.tempStats.groundPlaneCheckOrigin, stats.tempStats.groundPlaneCentroid);
@@ -404,6 +411,26 @@ public class PlayerBrain : MonoBehaviour
             stats.tempStats.correctionVelocity = stats.tempStats.groundNormal * targetDistanceMargin * settings.correctionSpeed;
         }
         stats.tempStats.moveVelocity.y = Mathf.Lerp(stats.tempStats.moveVelocity.y, stats.tempStats.targetVelocity.y, accellation * Time.fixedDeltaTime);
+    }
+
+    private void GetCeilingCheck()
+    {
+        stats.tempStats.ceilingCheckOrigin = new Vector3(capsuleCollider.bounds.center.x, transform.position.y + stats.tempStats.standingHeight - settings.ceilingCheckOrigin, capsuleCollider.bounds.center.z);
+
+        float height = Mathf.Max(stats.tempStats.standingHeight, settings.ceilingCheckRadius * 2f);
+        float halfHeight = height * 0.5f - settings.ceilingCheckRadius;
+
+        Vector3 top = stats.tempStats.ceilingCheckOrigin + Vector3.up * halfHeight;
+        Vector3 bottom = stats.tempStats.ceilingCheckOrigin - Vector3.up * halfHeight;
+
+        if (Physics.CheckCapsule(top, bottom, settings.ceilingCheckRadius, layerData.ground))
+        {
+            stats.tempStats.hitCeiling = true;
+        }
+        else
+        {
+            stats.tempStats.hitCeiling = false;
+        }
     }
     private void GetGroundData()
     {
@@ -496,10 +523,19 @@ public class PlayerBrain : MonoBehaviour
         stats.tempStats.curCamPivotPos = Vector3.Lerp(stats.tempStats.curCamPivotPos, stats.tempStats.targetCamPivotPos, settings.camAcceleration * Time.deltaTime);
         camPivot.transform.localPosition = stats.tempStats.curCamPivotPos;
     }
-    private void OnDrawGizmosSelected()
+
+#if UNITY_EDITOR
+    private void OnDrawGizmos()
     {
         if (capsuleCollider == null) return;
-        stats.tempStats.groundPlaneCheckOrigin = new Vector3(capsuleCollider.bounds.center.x, capsuleCollider.bounds.min.y + settings.groundCheckOrigin, capsuleCollider.bounds.center.z);
+        DrawPlayer();
+        DrawGroundPlaneCheck();
+        DrawGroundThreshold();
+        DrawCeilingThreshold();
+    }
+
+    private void DrawGroundPlaneCheck()
+    {
         for (int i = 0; i < stats.cacheStats.checkOffets.Length; i++)
         {
             Vector3 start = stats.tempStats.groundPlaneCheckOrigin + stats.cacheStats.checkOffets[i];
@@ -509,6 +545,9 @@ public class PlayerBrain : MonoBehaviour
             Gizmos.color = hit ? Color.green : Color.red;
             Gizmos.DrawLine(start, start + Vector3.down * settings.groundPlaneCheckDistance);
         }
+    }
+    private void DrawGroundThreshold()
+    {
         Vector3 editorGroundNormal = Application.isPlaying ? -stats.tempStats.groundNormal : Vector3.down;
         for (int i = 0; i < stats.cacheStats.checkOffets.Length; i++)
         {
@@ -519,20 +558,25 @@ public class PlayerBrain : MonoBehaviour
             Gizmos.color = hit ? Color.cyan : Color.orange;
             Gizmos.DrawLine(start, start + editorGroundNormal * settings.standingGroundTheshold);
         }
-
-        Vector3 center = capsuleCollider.transform.TransformPoint(capsuleCollider.center);
-        Vector3 nextFramePosition = center + (stats.tempStats.moveVelocity * Time.fixedDeltaTime);
-        float height = Mathf.Max(capsuleCollider.height, capsuleCollider.radius * 2f);
-        float halfHeight = height * 0.5f - capsuleCollider.radius;
-        Vector3 point1 = new(nextFramePosition.x, nextFramePosition.y + halfHeight, nextFramePosition.z);
-        Vector3 point2 = new(nextFramePosition.x, nextFramePosition.y - halfHeight, nextFramePosition.z);
-
-        Gizmos.color = Color.aquamarine;
-        Gizmos.DrawWireSphere(point1, capsuleCollider.radius);
-        Gizmos.DrawWireSphere(point2, capsuleCollider.radius);
-
     }
-    private void OnDrawGizmos()
+
+    private void DrawCeilingThreshold()
+    {
+        Gizmos.color = Color.red;
+
+
+        float height = Mathf.Max(stats.tempStats.standingHeight, settings.ceilingCheckRadius * 2f);
+        float halfHeight = height * 0.5f - settings.ceilingCheckRadius;
+
+        Vector3 top = stats.tempStats.ceilingCheckOrigin + Vector3.up * halfHeight;
+        Vector3 bottom = stats.tempStats.ceilingCheckOrigin - Vector3.up * halfHeight;
+
+        Gizmos.color =  Physics.CheckCapsule(top,bottom, settings.ceilingCheckRadius, layerData.ground) ? Color.cyan : Color.orange;
+        // Draw hemispheres
+        Gizmos.DrawWireSphere(top, settings.ceilingCheckRadius);
+        Gizmos.DrawWireSphere(bottom, settings.ceilingCheckRadius);
+    }
+    private void DrawPlayer()
     {
         Gizmos.color = Color.red;
 
@@ -549,4 +593,5 @@ public class PlayerBrain : MonoBehaviour
         Gizmos.DrawSphere(top, radius);
         Gizmos.DrawSphere(bottom, radius);
     }
+#endif
 }
