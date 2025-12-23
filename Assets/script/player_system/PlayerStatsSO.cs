@@ -6,7 +6,7 @@ public class PlayerStatsSO : ScriptableObject
 {
     [Serializable] public struct TempStats
     {
-        public Vector3[] hitPoints;
+        public RaycastHit[] hitPoints;
 
         public Quaternion moveRotationQuaternion;
         public Vector3 moveDirection;
@@ -35,6 +35,8 @@ public class PlayerStatsSO : ScriptableObject
         public float curGroundThreshold;
         public float targetGroundThreshold;
         public float slopeMultiplier;
+
+        public int mostUpHitIndex;
 
         public bool willJump;
         public bool willSlide;
