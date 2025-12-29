@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 513184450624758508}
   - component: {fileID: 6452874443088100421}
   - component: {fileID: 2638329359253706346}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: javelin_model
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -50,9 +50,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::JavelinProjectile
   rb: {fileID: 6452874443088100421}
   coll: {fileID: 2638329359253706346}
-  force: 17.36
-  rotation_speed: 5
-  input_data_SO: {fileID: 11400000, guid: f066dad57d679fc46bde5fd5b502ebc7, type: 2}
 --- !u!33 &3142555573391816653
 MeshFilter:
   m_ObjectHideFlags: 0
