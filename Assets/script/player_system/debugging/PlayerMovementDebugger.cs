@@ -69,7 +69,6 @@ public class PlayerMovementDebugger : MonoBehaviour
             DebugData data = debug_data[i];
 
             if(!data.initialized) continue;
-            Debug.Log("Drawing quad: " + i);
             DebugDraw.WireQuad
             (
                 data.centroid_position,
