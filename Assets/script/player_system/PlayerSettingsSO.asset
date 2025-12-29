@@ -15,31 +15,32 @@ MonoBehaviour:
   walkSpeed: 5
   runSpeed: 12
   groundAcceleration: 10
-  airAcceleration: 10
-  jumpForce: 9
+  jumpForce: 12
   jumpBufferTime: 0.1
-  slideBufferTime: 0.1
-  slideHeight: 0.5
-  standingHeight: 2
+  coyoteTime: 0.1
+  airAcceleration: 10
+  gravity: 18
+  maxFallSpeed: -30
+  fallGravMultiplier: 4.79
   slideSpeed: 20
   slideAccelation: 2
-  crouchSpeed: 1
+  slideJumpSpeed: 20
+  slideBufferTime: 0.1
   minimumSlideSpeed: 0.05
-  coyoteTime: 0.1
+  crouchSpeed: 1
+  slideHeight: 0.5
+  standingHeight: 2
   clampedPitch: 70
   camAcceleration: 3
-  gravity: 15
-  maxFallSpeed: -30
-  fallGravMultiplier: 3.76
   maxCollisionCount: 8
   groundCheckRadius: 0.75
   groundPlaneCheckDistance: 2.5
-  groundCheckOrigin: 0.5
+  groundCheckOrigin: 0.1
   standingGroundTheshold: 1.5
   crouchGroundThreshold: 0.5
   groundThresholdBuffer: 0.2
-  ceilingCheckRadius: 0.2
-  ceilingCheckOrigin: 1.98
+  ceilingCheckRadius: 0.21
+  ceilingCheckOrigin: 1.44
   mass: 80
   correctionSpeed: 10
   slopeAngleThreshold: 72.2
