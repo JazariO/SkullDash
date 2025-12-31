@@ -13,32 +13,46 @@ MonoBehaviour:
   m_Name: PlayerStatsSO
   m_EditorClassIdentifier: Assembly-CSharp::PlayerStatsSO
   tempStats:
-    hitPoints: []
-    moveDirection: {x: 0, y: 0, z: 0, w: 0}
+    moveRotationQuaternion: {x: 0, y: 0, z: 0, w: 0}
+    moveDirection: {x: 0, y: 0, z: 0}
     moveVelocity: {x: 0, y: 0, z: 0}
     groundNormal: {x: 0, y: 0, z: 0}
-    groundPoint: {x: 0, y: 0, z: 0}
+    wallNormal: {x: 0, y: 0, z: 0}
     groundPlaneCentroid: {x: 0, y: 0, z: 0}
     targetVelocity: {x: 0, y: 0, z: 0}
-    correctionForce: 0
+    groundPlaneCheckOrigin: {x: 0, y: 1.77, z: -4.56}
+    ceilingCheckOrigin: {x: 0, y: 0, z: 0}
+    correctionVelocity: {x: 0, y: 0, z: 0}
+    targetCamPivotPos: {x: 0, y: 0, z: 0}
+    curCamPivotPos: {x: 0, y: 0, z: 0}
+    centerGroundNormal: {x: 0, y: 0, z: 0}
     curTargetSpeed: 0
     lastJumpTime: 0
+    lastSlideTime: 0
     speed: 0
     coyoteTimeElapsed: 0
-    curGravityMultiplier: 0
     curPitch: 0
     curYaw: 0
     slope: 0
     curAccel: 0
     slopeDirection: 0
+    curStepTheshold: 0
+    curGroundThreshold: 0
+    targetGroundThreshold: 0
+    slopeMultiplier: 0
+    standingHeight: 0
+    mostUpHitIndex: 0
     willJump: 0
+    willSlide: 0
     coyoteJump: 0
     isGrounded: 0
+    hitCeiling: 0
     curState: 0
   cacheStats:
-    groundCheckOffsets:
+    checkOffets:
     - {x: 0, y: 0, z: 0}
-    - {x: 0.4, y: 0, z: 0}
-    - {x: -0.4, y: 0, z: 0}
-    - {x: 0, y: 0, z: 0.4}
-    - {x: 0, y: 0, z: -0.4}
+    - {x: 0.375, y: 0, z: 0}
+    - {x: -0.375, y: 0, z: 0}
+    - {x: 0, y: 0, z: 0.375}
+    - {x: 0, y: 0, z: -0.375}
+    startCamPivotPosition: {x: 0, y: 0.5, z: 0}

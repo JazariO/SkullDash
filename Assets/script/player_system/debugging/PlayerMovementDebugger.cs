@@ -7,7 +7,7 @@ public class PlayerMovementDebugger : MonoBehaviour
     [SerializeField] PlayerStatsSO player_stats_SO;
     struct DebugData
     {
-        public Quaternion slope_normal_rotation;
+        public Vector3 slope_normal;
         public Vector3 centroid_position;
         public Vector3 velocity;
         public bool grounded;
@@ -27,13 +27,13 @@ public class PlayerMovementDebugger : MonoBehaviour
 
     private void Start()
     {
-        DebugData[] debug_data = new DebugData[data_size];
+        debug_data = new DebugData[data_size];
         
         // Initialize debug_data
         for(int i = 0; i < debug_data.Length; i++)
         {
             DebugData data = debug_data[i];
-            data.slope_normal_rotation = Quaternion.identity;
+            data.slope_normal = Vector3.up;
             data.centroid_position = Vector3.zero;
             data.velocity = Vector3.zero;
             data.initialized = false;
@@ -51,7 +51,7 @@ public class PlayerMovementDebugger : MonoBehaviour
             // Sample current player status data
             DebugData current_data = new DebugData
             {
-                slope_normal_rotation = Quaternion.FromToRotation(Vector3.forward, player_stats_SO.tempStats.groundNormal),
+                slope_normal = player_stats_SO.tempStats.groundNormal,
                 centroid_position = player_stats_SO.tempStats.groundPlaneCentroid,
                 velocity = player_stats_SO.tempStats.moveVelocity,
                 grounded = player_stats_SO.tempStats.isGrounded,
@@ -69,11 +69,10 @@ public class PlayerMovementDebugger : MonoBehaviour
             DebugData data = debug_data[i];
 
             if(!data.initialized) continue;
-
             DebugDraw.WireQuad
             (
                 data.centroid_position,
-                data.slope_normal_rotation,
+                data.slope_normal,
                 Vector3.one,
                 color: data.grounded ? Color.green : Color.red,
                 fromFixedUpdate: true
@@ -82,7 +81,7 @@ public class PlayerMovementDebugger : MonoBehaviour
             if(data.velocity.sqrMagnitude >= 0.001f)
             {
                 // Small elevation along the ground plane's normal
-                Vector3 elevationOffset = data.slope_normal_rotation * Vector3.forward * 1f;
+                Vector3 elevationOffset = data.slope_normal * 0.1f;
 
                 Vector3 arrowStart = data.centroid_position + elevationOffset;
                 Vector3 arrowEnd = arrowStart + data.velocity.normalized;

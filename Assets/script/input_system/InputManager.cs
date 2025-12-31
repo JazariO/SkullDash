@@ -38,10 +38,10 @@ public class InputManager : MonoBehaviour, ISaveableSettings
 
     private void Awake()
     {
-        if(!InputManager.isActive)
-            InputManager.isActive = true;
-        else
-            return;
+        //if(!InputManager.isActive)
+        //    InputManager.isActive = true;
+        //else
+        //    return;
 
         input_data_SO.moveInput = Vector2.zero;
         input_data_SO.lookInput = Vector2.zero;
@@ -70,11 +70,11 @@ public class InputManager : MonoBehaviour, ISaveableSettings
 
     private void OnEnable()
     {
-        if(!InputManager.isActive)
-        {
-            gameObject.SetActive(false);
-            return;
-        }
+        //if(!InputManager.isActive)
+        //{
+        //    gameObject.SetActive(false);
+        //    return;
+        //}
 
         // Init Player Prefs (if any)
         var rebinds = PlayerPrefs.GetString("rebinds");
@@ -97,7 +97,7 @@ public class InputManager : MonoBehaviour, ISaveableSettings
 
     private void OnDisable()
     {
-        if(InputManager.isActive) return;
+        //if(InputManager.isActive) return;
 
         // Save current binds to player prefs
         var rebinds = actions.SaveBindingOverridesAsJson();
@@ -114,9 +114,7 @@ public class InputManager : MonoBehaviour, ISaveableSettings
 
     private void Start()
     {
-        if(InputManager.isActive) return;
-
-
+        //if(InputManager.isActive) return;
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
     }

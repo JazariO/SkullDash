@@ -6,16 +6,21 @@ public class PlayerStatsSO : ScriptableObject
 {
     [Serializable] public struct TempStats
     {
-        public Vector3[] hitPoints;
+        public RaycastHit[] hitPoints;
+
         public Quaternion moveRotationQuaternion;
         public Vector3 moveDirection;
         public Vector3 moveVelocity;
         public Vector3 groundNormal;
+        public Vector3 wallNormal;
         public Vector3 groundPlaneCentroid;
         public Vector3 targetVelocity;
-        public Vector3 bottomCapsuleCenter;
+        public Vector3 groundPlaneCheckOrigin;
+        public Vector3 ceilingCheckOrigin;
+        public Vector3 targetCamPivotPos;
+        public Vector3 curCamPivotPos;
+        public Vector3 centerGroundNormal;
 
-        public float correctionForce;
         public float curTargetSpeed;
         public float lastJumpTime;
         public float lastSlideTime;
@@ -26,12 +31,20 @@ public class PlayerStatsSO : ScriptableObject
         public float slope;
         public float curAccel;
         public float slopeDirection;
-        public float curCameraYOffset;
         public float curStepTheshold;
+        public float targetGroundThreshold;
+        public float slopeMultiplier;
+        public float standingHeight;
+        public float topCapsuleYPos;
+        public float bottomCapsuleYPos;
+
+        public int mostUpHitIndex;
+
         public bool willJump;
         public bool willSlide;
         public bool coyoteJump;
         public bool isGrounded;
+        public bool hitCeiling;
 
         public PlayerBrain.State curState;
         
@@ -40,7 +53,11 @@ public class PlayerStatsSO : ScriptableObject
 
     [Serializable] public struct CacheStats
     {
-        public Vector3[] groundCheckOffsets;
+        public Vector3[] checkOffsets;
+        public Vector3 startCamPivotPosition;
+        public Vector3 startCapsulePosition;
+        public float startCapsuleHeight;
+        public float crouchThreshold;
     }
     public CacheStats cacheStats;
 }

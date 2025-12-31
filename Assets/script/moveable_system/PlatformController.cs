@@ -1,4 +1,3 @@
-using UnityEditor.Rendering;
 using UnityEngine;
 
 public class PlatformController : MonoBehaviour
@@ -17,11 +16,6 @@ public class PlatformController : MonoBehaviour
     private Vector3 rotation_axis_vector;
     private int current_waypoint_index;
     [SerializeField] Rigidbody rb_player;
-
-    private int debug_message_tick = 0;
-    private int debug_message_tickrate = 60;
-    private int debug_message_count = 0;
-    private int debug_message_maxCount = 10;
 
     [SerializeField] float rotation_offset;
 
